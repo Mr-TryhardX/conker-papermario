@@ -60,6 +60,21 @@ int main(int argc,char** argv) {
     assert(!hh_kane_wrap_draw(ram.data(),full,root,0x8017BC50,0x80202000));
     assert(read(ram.data(),full+4)==0x8017BC50);
     assert(read(ram.data(),0x8008D5BC)==full+8);
+    write(ram.data(),task+0x2C,data);
+    model.active_root=task;
+    uint32_t child=0x80203000,grandchild=0x80204000;
+    write(ram.data(),child+0xC,task);write(ram.data(),grandchild+0xC,child);
+    assert(hh_kane_hide_descendant(ram.data(),child));
+    assert(hh_kane_hide_descendant(ram.data(),grandchild));
+    assert(!hh_kane_hide_descendant(ram.data(),task));
+    write(ram.data(),child+0xC,child); // bounded cycle rejection
+    assert(!hh_kane_hide_descendant(ram.data(),child));
+    write(ram.data(),child+0xC,0x7FFFFFFC);
+    assert(!hh_kane_hide_descendant(ram.data(),child));
+    write(ram.data(),0x8008D5BC,dl+48);
+    hh_kane_discard_draw(ram.data(),dl);
+    assert(read(ram.data(),0x8008D5BC)==dl);
+    assert(read(ram.data(),dl)==0xDA380003); // commands not erased; only submission cursor changes
     // An invalid archive with a tiny body must reject relocations before reading them.
     auto invalid=std::filesystem::temp_directory_path()/"kane-invalid-test.bin";
     uint32_t metadata[]={1,1,1,1,0,0};

@@ -12,6 +12,9 @@ extern uint32_t hh_kane_override_begin(uint8_t*, uint32_t, uint32_t*);
 extern void hh_kane_override_end(uint8_t*, uint32_t, uint32_t);
 extern int hh_kane_wrap_draw(uint8_t*, uint32_t, uint32_t, uint32_t, uint32_t);
 
+extern int hh_kane_hide_descendant(uint8_t*, uint32_t);
+extern void hh_kane_discard_draw(uint8_t*, uint32_t);
+
 static int actor_word(const uint8_t* ram, uint32_t address, uint32_t* out) {
     if (address < 0x80000000u || address > 0x807FFFFCu || (address & 3)) return 0;
     memcpy(out, ram + (address - 0x80000000u), 4);
@@ -34,7 +37,9 @@ void func_8000C768_D368(uint8_t* rdram, recomp_context* ctx) {
     uint32_t replacement_field = hh_kane_override_begin(rdram, task, &original);
     uint32_t model_root = 0;
     if (replacement_field) actor_word(rdram, replacement_field, &model_root);
+    int hide_original_skin = hh_kane_hide_descendant(rdram, task);
     hh_original_actor_draw(rdram, ctx);
+    if (hide_original_skin) hh_kane_discard_draw(rdram, before);
     if (replacement_field) {
         uint32_t matrix = 0;
         actor_word(rdram, task + 0x1C, &matrix);

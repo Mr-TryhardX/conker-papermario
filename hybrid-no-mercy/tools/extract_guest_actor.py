@@ -118,7 +118,9 @@ def run(snapshot,out):
     for pc in range(min(calls)-512,max(calls)+8,8):
         a,b=g.unpack('>II',pc);op=a>>24
         if op==0xdc and (a&255)==0x0e:current=g.matrix(b)
-        elif op==1:
+        elif op==1 and current is not None:
+            # The bounded preamble can begin inside another actor's draw.
+            # Ignore its loads until a force-matrix establishes this cache.
             load_vertices(g,a,b,current,inverse,cache)
         elif op==0xde and (b&0xffffff) in targets:
             p=targets[b&0xffffff];count=max(max(f) for f in p['faces'])+1

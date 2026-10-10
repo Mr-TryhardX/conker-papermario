@@ -18,7 +18,7 @@ uint32_t read(const uint8_t* ram,uint32_t a) { return word(ram+a-0x80000000u); }
 void write(uint8_t* ram,uint32_t a,uint32_t x) { std::memcpy(ram+a-0x80000000u,&x,4); }
 struct Model {
     bool attempted=false;
-    uint32_t address=0;
+    uint32_t address=0, active_root=0;
     std::vector<uint32_t> frames;
     void load(uint8_t* ram) {
         if(attempted)return;
@@ -100,10 +100,34 @@ extern "C" int hh_kane_wrap_draw(uint8_t* ram,uint32_t before,uint32_t root,uint
         const uint32_t commands[]={0xDA380003u,matrix,0xE0525464u,0x10000064u,0x6400002Cu,1u,0xDE000000u,root,0x6400002Cu,0u,0xE0525464u,0x20000000u};
         for(unsigned i=0;i<12;++i)write(ram,pos+i*4,commands[i]);
         write(ram,0x8008D5BCu,after+40);
+        model.active_root=read(ram,0x801BBCD0u);
         return true;
     }
     // Never leave an unresolved heap pointer in the ordinary segmented path.
     for(uint32_t pos=before;pos<after;pos+=8)
         if(read(ram,pos)==0xDE000000u && read(ram,pos+4)==root)write(ram,pos+4,original);
     return false;
+}
+
+extern "C" int hh_kane_hide_descendant(uint8_t* ram,uint32_t task) {
+    if(model.frames.empty() || !model.active_root || task==model.active_root ||
+       read(ram,0x801BBCD0u)!=model.active_root)return 0;
+    uint32_t root_data=read(ram,model.active_root+0x2C);
+    if(!in_guest(root_data,0x70) || !read(ram,root_data+0x28))return 0;
+    // Task creation in func_80005670 establishes +0xC as the parent link.
+    // Bound ancestry traversal so corrupt pointers/cycles cannot stall rendering.
+    for(unsigned depth=0;depth<32;++depth) {
+        if(!in_guest(task,0x30))return 0;
+        task=read(ram,task+0xC);
+        if(task==model.active_root)return 1;
+        if(!task)return 0;
+    }
+    return 0;
+}
+extern "C" void hh_kane_discard_draw(uint8_t* ram,uint32_t before) {
+    uint32_t after=read(ram,0x8008D5BCu);
+    if(in_guest(before,8) && before%8==0 && after>=before && after-before<=4096) {
+        write(ram,0x8008D5BCu,before);
+        write(ram,0x8008D548u,0);
+    }
 }

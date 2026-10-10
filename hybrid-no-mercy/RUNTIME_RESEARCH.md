@@ -71,3 +71,37 @@ Validation: the native executable builds and contains the strong override; repea
 Live integration found a real limitation missed by loader-only checks: RT64's normal segmented-address path truncates addresses above 16 MiB. The first player draw loaded the archive at 0x810000B0, then the unextended interpreter followed invalid display lists and crashed. Whole-frame extended addressing is unsuitable because original commands use addresses that depend on hardware DMA masking. The final implementation wraps only the model call in RT64's supported extension enable/address-mode/disable commands. It bounds expansion to the game's alternating display-list buffers (roots separated by 0x10048, as main_27C0 establishes), reserves tail space, and restores the original geometry call when capacity is insufficient. Tests verify the exact envelope, following commands, sentinels and capacity fallback.
 
 The first-level E0 task uses an empty display list at 0x8017BC50 (DF000000), so it is the logical player root rather than the complete visible skin. Its 0x10008 flags compute a model matrix without submitting a matrix load. The replacement envelope therefore explicitly loads the computed task+0x1C matrix before Kane. Original visible descendant geometry still needs identification and suppression. The corrected native build and envelope tests pass; live first-level retest is pending.
+
+
+## Controlled first-corridor checkpoint
+
+The model-only extended-address envelope rendered Kane in the actual first
+corridor. A one-second forward input changed the original player position and
+the camera followed; this verifies original level movement with the imported
+model. The initial result overlaps the original visible skin. Model scale 10
+matches the root's 0.01 transform; the earlier scale 50 was too large.
+
+The next build suppresses only draw commands from tasks whose bounded +0xC
+parent chain reaches the active replaced root. Original draw functions still
+execute so their matrices and scheduler effects remain intact. Parent linkage
+was verified in original func_80005670. Synthetic ancestry, cycle, malformed
+pointer, cursor restoration and display-list bounds checks pass. Live visual
+confirmation of this hiding change is pending; menu reference poses still do
+not constitute movement or wrestling animations. tools/run_native_kane.sh
+provides the opt-in local launcher. No new Windows campaign package exists.
+
+Windows cross-build preparation installed xwin 0.10.0. SDK downloads currently
+receive proxy 403 for aka.ms and download.visualstudio.microsoft.com; these
+precise destinations were added to the environment draft, which requires
+review/save and publication. This draft does not change current connectivity.
+Linux-cross-built DXIL is unsigned: a future Windows package must select Vulkan
+as documented by the native project's BUILDING.md.
+
+
+Reference capture now requires an explicitly named fresh output directory and
+a description of the inspected motion, preserving the 40 earlier menu poses.
+The parser ignores vertex loads before a force-matrix in its bounded preamble;
+existing reference and malformed-data checks pass. One ring snapshot reconstructs
+21 parts/777 triangles, but continuous in-ring capture remains blocked: stale
+draw-list calls after an end marker can select an incomplete vertex cache.
+Failed captures remain separate and are not promoted to animation archives.

@@ -13,7 +13,7 @@ def run(args):
     if result.returncode:raise RuntimeError(result.stderr[:12000])
     return result.stdout
 
-def build(source,out,frames=40,scale=50.0,gbi=None):
+def build(source,out,frames=40,scale=10.0,gbi=None):
     poses=json.loads((source/'poses.json').read_text())['poses'][:frames]
     if not poses:raise ValueError('No poses')
     out.mkdir(parents=True,exist_ok=True)
@@ -85,5 +85,5 @@ def build(source,out,frames=40,scale=50.0,gbi=None):
     return report
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--source',type=Path,default=ROOT/'asset-import/kane-animation');p.add_argument('--output',type=Path,default=ROOT/'asset-import/kane-displaylists');p.add_argument('--frames',type=int,default=40);p.add_argument('--scale',type=float,default=50);p.add_argument('--gbi',type=Path,help='Complete libultra F3DEX2 gbi.h; auto-detects the local Paper Mario header')
+    p=argparse.ArgumentParser();p.add_argument('--source',type=Path,default=ROOT/'asset-import/kane-animation');p.add_argument('--output',type=Path,default=ROOT/'asset-import/kane-displaylists');p.add_argument('--frames',type=int,default=40);p.add_argument('--scale',type=float,default=10);p.add_argument('--gbi',type=Path,help='Complete libultra F3DEX2 gbi.h; auto-detects the local Paper Mario header')
     a=p.parse_args();print(json.dumps(build(a.source,a.output,a.frames,a.scale,a.gbi),indent=2))
