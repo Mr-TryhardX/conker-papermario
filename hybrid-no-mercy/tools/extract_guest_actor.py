@@ -109,20 +109,25 @@ def actor_graphics_task(g):
     if len(tasks)!=1:raise ValueError('Missing or ambiguous actor graphics task')
     return tasks[0]
 
-def replay_actor_task(g,parts,inverse):
+def actor_base(actor_index):
+    if actor_index not in range(4): raise ValueError("Actor index must be 0..3")
+    return 0x91cc0 + actor_index * 0x1810
+
+def replay_actor_task(g,parts,inverse,actor_index=0):
+    base=actor_base(actor_index); last=base+24*0xdc
     task,root,size=actor_graphics_task(g)
     targets={p['display_list']:p for p in parts}
-    cache={};bindings={};matrix_targets={};current=None;current_bone=None;current_address=None;seen=set();segments=[0]*16
+    cache={};bindings={};matrix_targets={};local_vertices={};current=None;current_bone=None;current_address=None;seen=set();segments=[0]*16
     matrix_bones={p['object']+0x38:p['bone'] for p in parts if 'object' in p}
     # Non-drawing joints can load shared vertices used by another draw part.
-    for bone in range(0x91cc0,0x93160+1,0xdc):
+    for bone in range(base,last+1,0xdc):
         obj=g.word(bone+0x14)&0xffffff
         if 0<obj<0x800000-0x78:matrix_bones[obj+0x38]=bone
     for i in range(128):
         obj=g.word(0x61d40+i*4)&0xffffff
         if not 0<obj<0x800000-0x78 or g.word(obj)!=1:continue
         bone=g.word(obj+4)&0xffffff
-        if 0x91cc0<=bone<=0x93160:matrix_bones[obj+0x38]=bone
+        if base<=bone<=last:matrix_bones[obj+0x38]=bone
     pc=root;limit=root+size;stack=[];budget=65536
     while budget:
         budget-=1
@@ -146,13 +151,14 @@ def replay_actor_task(g,parts,inverse):
             current=g.matrix(address);current_bone=matrix_bones.get(address);current_address=address
             if current_bone is None and address>=0x38 and g.word(address-0x38)==1:
                 bone=g.word(address-0x34)&0xffffff
-                if 0x91cc0<=bone<=0x93160 and (bone-0x91cc0)%0xdc==0:
+                if base<=bone<=last and (bone-base)%0xdc==0:
                     current_bone=bone
         elif op==1:
             load_vertices(g,a,resolve(b),current,inverse,cache)
             n=(a>>12)&255;start=((a>>1)&127)-n
             for i in range(start,start+n):
                 bindings[i]=current_bone;matrix_targets[i]=current_address
+                local_vertices[i]=list(g.unpack('>3h',resolve(b)+(i-start)*16))
         elif op==0xde:
             target=resolve(b)
             if target in targets:
@@ -163,6 +169,7 @@ def replay_actor_task(g,parts,inverse):
                 p['vertices']=[cache[i][:3]+[cache[i][3]/w,cache[i][4]/h] for i in range(count)]
                 p['vertex_bones']=[bindings.get(i) for i in range(count)]
                 p['vertex_matrix_targets']=[matrix_targets.get(i) for i in range(count)]
+                p['vertex_local_positions']=[local_vertices[i] for i in range(count)]
                 p['matrix']=np.eye(4).tolist();seen.add(p['bone'])
             if not (a>>16)&1:stack.append((pc,limit))
             pc=target;limit=None
@@ -172,7 +179,8 @@ def replay_actor_task(g,parts,inverse):
     else:raise ValueError('Submitted display-list budget exceeded')
     return seen,task,root,size
 
-def run(snapshot,out):
+def run(snapshot,out,actor_index=0):
+    base=actor_base(actor_index);last=base+24*0xdc
     data=snapshot.read_bytes();g=Guest(data);out.mkdir(parents=True,exist_ok=True)
     parts=[]
     for i in range(128):
@@ -180,14 +188,14 @@ def run(snapshot,out):
         if not 0<obj<0x800000-0xb8 or g.word(obj)!=1:continue
         bone=g.word(obj+4)&0xffffff
         # Reference actor's resident skeleton; exclude UI and other actors.
-        if not 0x91cc0<=bone<=0x93160:continue
+        if not base<=bone<=last:continue
         p=parse_part(g,obj,out)
         if p:parts.append(p)
     if len(parts)<20:raise ValueError('Incomplete reference actor')
     first=next(p for p in parts if abs(np.linalg.det(np.array(p['reference_matrix']).reshape(4,4)))>.1)
     camera=np.linalg.inv(np.array(first['reference_matrix']).reshape(4,4))@np.array(first['clip_matrix'])
     inverse=np.linalg.inv(camera)
-    seen,task,root,size=replay_actor_task(g,parts,inverse)
+    seen,task,root,size=replay_actor_task(g,parts,inverse,actor_index)
     if len(seen)!=len(parts):raise ValueError('Missing draw parts')
     for p in parts:
         p.pop('clip_matrix')
@@ -196,10 +204,12 @@ def run(snapshot,out):
     record={'source':'No Mercy original renderer reference pose; no skeletal codec inferred',
             'snapshot_sha256':hashlib.sha256(data).hexdigest(),
             'graphics_task':task,'display_list_root':root,'display_list_bytes':size,
-            'actor_root_matrix':list(g.unpack('>16f',0x91cc0+0x1c)),'parts':parts}
+            'actor_index':actor_index,'actor_skeleton_base':base,
+            'actor_root_matrix':list(g.unpack('>16f',base+0x1c)),'parts':parts}
     (out/'actor.json').write_text(json.dumps(record)+'\n')
     print(f'Reconstructed {len(parts)} textured draw parts, {sum(len(p["faces"]) for p in parts)} triangles')
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('snapshot',type=Path);p.add_argument('output',type=Path)
-    a=p.parse_args();run(a.snapshot,a.output)
+    p.add_argument('--actor-index',type=int,choices=range(4),default=0)
+    a=p.parse_args();run(a.snapshot,a.output,a.actor_index)

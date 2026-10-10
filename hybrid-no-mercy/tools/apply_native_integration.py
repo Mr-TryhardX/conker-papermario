@@ -77,6 +77,7 @@ edit("CMakeLists.txt", "src/game/hh_actor_draw.c", "target_include_directories(H
 
 copy_if_changed(root/"integration/hh_kane_model.cpp",game/"src/game/hh_kane_model.cpp")
 copy_if_changed(root/"integration/hh_kane_motion.hpp",game/"src/game/hh_kane_motion.hpp")
+copy_if_changed(root/"integration/hh_kane_preview.hpp",game/"src/game/hh_kane_preview.hpp")
 edit("CMakeLists.txt", "src/game/hh_kane_model.cpp", "target_sources(HybridHeavenRecompiled PRIVATE ${CMAKE_SOURCE_DIR}/src/game/hh_actor_draw.c)", "target_sources(HybridHeavenRecompiled PRIVATE ${CMAKE_SOURCE_DIR}/src/game/hh_actor_draw.c ${CMAKE_SOURCE_DIR}/src/game/hh_kane_model.cpp)")
 
 # Remove only our earlier experimental whole-frame mode: original commands

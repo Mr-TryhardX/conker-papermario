@@ -9,6 +9,7 @@ from pathlib import Path
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('capture', type=Path)
+    parser.add_argument('--actor-index',type=int,choices=range(4),default=0)
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     ram = args.capture.resolve().read_bytes()
@@ -30,12 +31,12 @@ def main():
     include = root/'native/HybridHeaven/lib/N64ModernRuntime/N64Recomp/include'
     subprocess.run(['gcc','-O2','-I'+str(include),'-Igenerated','generated/funcs_0.c',
                     str(root/'tests/skeleton_reference_wrapper.c'),'-lm','-o','reference-skeleton'],cwd=work,check=True)
-    result = subprocess.run([work/'reference-skeleton',args.capture.resolve()],stdout=subprocess.PIPE,check=True)
+    result = subprocess.run([work/'reference-skeleton',args.capture.resolve(),str(args.actor_index)],stdout=subprocess.PIPE,check=True)
     if len(result.stdout) != 20*16*4:
         raise ValueError('Short original skeleton output')
     maximum = 0.0
     for joint in range(20):
-        original = struct.unpack_from('>16I',ram,0x91CC0+joint*0xDC+0x1C)
+        original = struct.unpack_from('>16I',ram,0x91CC0+args.actor_index*0x1810+joint*0xDC+0x1C)
         rebuilt = struct.unpack_from('<16I',result.stdout,joint*64)
         for a,b in zip(original,rebuilt):
             x,y = struct.unpack('>f',struct.pack('>I',a))[0],struct.unpack('>f',struct.pack('>I',b))[0]
@@ -46,7 +47,7 @@ def main():
             raise AssertionError(f'Joint {joint} differs from captured matrix (max error {maximum})')
     report = {'reference':'Original func_80012BE0 and eight dependencies',
               'capture_sha256':hashlib.sha256(ram).hexdigest(),
-              'joints':20,'matrix_elements':320,'result':'bit-exact match',
+              'actor_index':args.actor_index,'joints':20,'matrix_elements':320,'result':'bit-exact match',
               'maximum_error':maximum,'address_space':'private No Mercy memory'}
     (work/'validation.json').write_text(json.dumps(report,indent=2)+'\n')
     print('PASS: all 20 original skeleton matrices match the captured renderer bit for bit.')

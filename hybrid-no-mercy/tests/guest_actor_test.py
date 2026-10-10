@@ -4,7 +4,7 @@ import json,math,struct,sys
 from pathlib import Path
 import numpy as np
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
-from extract_guest_actor import Guest,load_vertices,display_list,actor_graphics_task,replay_actor_task
+from extract_guest_actor import Guest,load_vertices,display_list,actor_graphics_task,replay_actor_task,actor_base
 
 ram=bytearray(0x800000)
 struct.pack_into('>hhhHhh4B',ram,256,2,3,4,0,64,96,255,255,255,255)
@@ -37,6 +37,17 @@ assert (seen,task,dl,size)==({1},0x380800,0x380000,40)
 assert parts[0]['vertices']==[[2,3,4,2,3]]
 assert parts[0]['vertex_bones']==[0x91D9C]
 assert parts[0]['vertex_matrix_targets']==[0x5000]
+assert parts[0]['vertex_local_positions']==[[2,3,4]]
+# A second actor must bind its own joint, never the first actor's address.
+struct.pack_into('>II',ram,0x5000-0x38,1,0x800935AC)
+replay_actor_task(Guest(bytes(ram)),parts,identity,1)
+assert parts[0]['vertex_bones']==[0x935AC]
+replay_actor_task(Guest(bytes(ram)),parts,identity,0)
+assert parts[0]['vertex_bones']==[None]
+for invalid in (-1,4):
+    try:actor_base(invalid)
+    except ValueError:pass
+    else:raise AssertionError('Invalid wrestler slot accepted')
 # A shorter task cannot read a stale end/call beyond its submitted size.
 struct.pack_into('>I',ram,0x380800+0x34,24)
 try:replay_actor_task(Guest(bytes(ram)),parts,identity)

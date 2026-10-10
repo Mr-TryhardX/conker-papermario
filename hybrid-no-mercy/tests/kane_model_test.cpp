@@ -1,5 +1,6 @@
 #include "../integration/hh_kane_model.cpp"
 #include <cassert>
+#include <algorithm>
 #include <filesystem>
 #include <limits>
 
@@ -35,7 +36,7 @@ int main(int argc,char** argv) {
     write(ram.data(),data+0x24,0x10008);
     uint32_t field=hh_kane_override_begin(ram.data(),task,&original);
     assert(field==data+0x28 && original==0x8017BC50);
-    assert(read(ram.data(),field)>=0x81000100 && read(ram.data(),field)<0x81200000);
+    assert(std::find(fixture.frames.begin(),fixture.frames.end(),read(ram.data(),field))!=fixture.frames.end());
     hh_kane_override_end(ram.data(),field,original);
     assert(read(ram.data(),field)==0x8017BC50);
     assert(read(ram.data(),data+0x24)==0x10008);

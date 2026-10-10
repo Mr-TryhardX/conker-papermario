@@ -2,6 +2,7 @@
 // Allocation belongs to librecomp's mod heap; no guessed scratch RAM is used.
 #include "librecomp/addresses.hpp"
 #include "hh_kane_motion.hpp"
+#include "hh_kane_preview.hpp"
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -62,7 +63,23 @@ struct Model {
 };
 Model model;
 Model walk_model;
+Model preview_model;
 KaneMotion motion;
+KanePreview preview;
+uint32_t preview_request=0;
+int64_t last_preview_poll=0;
+void poll_preview_request(int64_t ms) {
+    static const char* path=std::getenv("HH_KANE_PREVIEW_REQUEST_PATH");
+    if(!path || preview_model.frames.empty() || ms-last_preview_poll<50)return;
+    last_preview_poll=ms;
+    std::ifstream file(path,std::ios::binary|std::ios::ate);
+    if(!file || file.tellg()<=0 || file.tellg()>64)return;
+    file.seekg(0);
+    file>>std::ws;
+    if(file.peek()<'0' || file.peek()>'9')return;
+    uint32_t request;char extra;
+    if((file>>request) && !(file>>extra))preview_request=request;
+}
 }
 extern "C" uint32_t hh_kane_override_begin(uint8_t* ram,uint32_t task,uint32_t* original) {
     static const bool enabled=std::getenv("HH_KANE_IN_GAME")!=nullptr;
@@ -83,16 +100,22 @@ extern "C" uint32_t hh_kane_override_begin(uint8_t* ram,uint32_t task,uint32_t* 
     bool walking=moving && !walk_model.frames.empty();
     size_t frame=(ms/120)%model.frames.size();
     if(walking) { frame=motion.frame(walk_model.frames.size());pose=walk_model.frames[frame]; }
+    preview_model.load(ram,"HH_KANE_PREVIEW_MODEL_PATH");
+    poll_preview_request(ms);
+    auto preview_frame=preview.sample(task,preview_request,ms,preview_model.frames.size());
+    unsigned mode=walking?1:0;
+    if(preview_frame) { mode=2;frame=*preview_frame;pose=preview_model.frames[frame]; }
     static const char* probe=std::getenv("HH_KANE_MOTION_PROBE_PATH");
-    static bool observed=false,last_walking=false;
+    static bool observed=false;
+    static unsigned last_mode=0;
     static uint32_t last_task=0;
     static unsigned records=0;
-    if(probe && std::isfinite(x) && std::isfinite(z) && records<128 && (!observed || last_task!=task || walking!=last_walking)) {
+    if(probe && std::isfinite(x) && std::isfinite(z) && records<128 && (!observed || last_task!=task || mode!=last_mode)) {
         if(FILE* file=std::fopen(probe,"a")) {
-            std::fprintf(file,"{\"task\":%u,\"mode\":\"%s\",\"frame\":%zu,\"x\":%.9g,\"z\":%.9g}\n",task,walking?"walk":"idle",frame,x,z);
+            std::fprintf(file,"{\"task\":%u,\"mode\":\"%s\",\"frame\":%zu,\"x\":%.9g,\"z\":%.9g}\n",task,mode==2?"preview":mode==1?"walk":"idle",frame,x,z);
             std::fclose(file);++records;
         }
-        observed=true;last_task=task;last_walking=walking;
+        observed=true;last_task=task;last_mode=mode;
     }
     *original=geometry;
     write(ram,data+0x28,pose);

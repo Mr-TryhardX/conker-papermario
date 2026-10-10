@@ -110,3 +110,26 @@ canaries at the actual allocation boundary; 10/20/69-pose tests all pass.
 The new silent H.264 preview plays these decoded geometry poses at a chosen
 20 frames per second. It is an offline attacker-only preview, without an
 opponent or live combat/damage/music. No full playable finisher is claimed.
+
+Native one-shot follow-up: the optional preview model/request-file bridge now
+plays the decoded 69-frame attacker archive in the actual first corridor,
+then returns to standing. Task rebinding, cancellation, duplicate draws and
+completion are tested. The native player probe remains at
+(-300,490.25,262.175781) across preview/standing transitions. This is geometry
+staging, without opponent contact, damage or new combat audio.
+Kane-Native-Chokeslam-One-Shot.mp4 is silent H.264, 1280x720, 180 frames
+at 30fps: capture duration 6.000232 seconds, video duration 6 seconds.
+The bridge is disabled unless HH_KANE_PREVIEW_MODEL_PATH and
+HH_KANE_PREVIEW_REQUEST_PATH are explicitly supplied. Change the request
+file to a new positive uint32 token to start; zero cancels.
+
+Exact-bind follow-up: extraction now retains original local vertex coordinates
+so skeletal baking avoids inverse projection of rounded renderer matrices.
+The active native recording uses the preceding world-inverse-bind archive;
+exact-local attacker and defender bakes remain offline. Extraction, original
+skeleton checks and baking now support actor indices 0..3 with a validated
+0x1810 skeleton stride and 2852-byte pose-array stride. Slot 1's actual
+Chris Benoit mesh extracts as 21 parts/777 triangles; all 20 matrices match
+the original builder bit for bit, and record 34EC produces 69 distinct finite
+defender poses. A second-actor synthetic check verifies vertex binding
+isolation. Paired world anchors/contact still need original-game validation.
