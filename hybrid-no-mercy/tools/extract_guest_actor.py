@@ -207,6 +207,7 @@ def run(snapshot,out,actor_index=0):
             'snapshot_sha256':hashlib.sha256(data).hexdigest(),
             'graphics_task':task,'display_list_root':root,'display_list_bytes':size,
             'actor_index':actor_index,'actor_skeleton_base':base,
+            'actor_to_clip_matrix':camera.tolist(),
             'actor_root_matrix':list(g.unpack('>16f',base+0x1c)),'parts':parts}
     (out/'actor.json').write_text(json.dumps(record)+'\n')
     print(f'Reconstructed {len(parts)} textured draw parts, {sum(len(p["faces"]) for p in parts)} triangles')

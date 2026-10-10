@@ -150,3 +150,16 @@ objects do not necessarily match the current submitted draw lists. The retained
 24-frame ordinary-controller grapple attempt contains 21 parts/777 triangles
 per actor with synchronized hashes and finite geometry. Move identity, paired
 contact and native combat remain unverified. Health HUD is explicitly last.
+
+Shared-coordinate research: extraction retains the derived actor-to-clip
+matrix and compose_captured_pair.py cancels a common projection to place
+synchronized geometry together. Synthetic checks verify transform direction,
+UV preservation, input isolation, mismatched-frame rejection and singular
+matrices. A 3-frame original capture renders both wrestlers in one view.
+However, its derived relative transform differs from the independently stored
+actor-root transform (maximum element error 57.398259 in the inspected frame)
+and includes unexpected axis coupling. This is unresolved, possibly involving
+pose/render timing or matrix interpretation. The paired compositor is an
+offline diagnostic, not a validated world anchor or native combat feature.
+Do not use its relative matrix for combat positioning until this discrepancy
+is explained and verified against original displayed contact.
