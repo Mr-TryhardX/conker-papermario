@@ -123,7 +123,7 @@ def replay_actor_task(g,parts,inverse,actor_index=0):
     for bone in range(base,last+1,0xdc):
         obj=g.word(bone+0x14)&0xffffff
         if 0<obj<0x800000-0x78:matrix_bones[obj+0x38]=bone
-    for i in range(128):
+    for i in range(256):
         obj=g.word(0x61d40+i*4)&0xffffff
         if not 0<obj<0x800000-0x78 or g.word(obj)!=1:continue
         bone=g.word(obj+4)&0xffffff
@@ -183,12 +183,14 @@ def run(snapshot,out,actor_index=0):
     base=actor_base(actor_index);last=base+24*0xdc
     data=snapshot.read_bytes();g=Guest(data);out.mkdir(parents=True,exist_ok=True)
     parts=[]
-    for i in range(128):
+    # A manager-filled ring places the second wrestler at entries 132..177.
+    # Bound candidate discovery to 256 words and validate every object/joint;
+    # the submitted task replay below must still confirm every chosen part.
+    for i in range(256):
         obj=g.word(0x61d40+i*4)&0xffffff
         if not 0<obj<0x800000-0xb8 or g.word(obj)!=1:continue
         bone=g.word(obj+4)&0xffffff
-        # Reference actor's resident skeleton; exclude UI and other actors.
-        if not base<=bone<=last:continue
+        if not base<=bone<=last or (bone-base)%0xdc:continue
         p=parse_part(g,obj,out)
         if p:parts.append(p)
     if len(parts)<20:raise ValueError('Incomplete reference actor')

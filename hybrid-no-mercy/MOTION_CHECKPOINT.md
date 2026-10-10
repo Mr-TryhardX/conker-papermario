@@ -139,3 +139,14 @@ The paired skeleton checker now uses distinct captured actor slots by default
 again produce 69 finite distinct matrix sets. The exact-local attacker archive
 also compiles and passes native display-list and owned-loader checks at
 2998224 bytes/7383 relocations; it has not replaced the active recorded build.
+
+Paired capture follow-up: --actors 0 1 now captures both wrestlers from each
+immutable guest snapshot with identical timestamps. Managers in a ring push
+the second wrestler's draw entries beyond the old 128-word prefix (observed
+132..177); candidate discovery now inspects 256 bounded words, validates
+object/joint ownership and confirms parts through the submitted task replay.
+A skeleton-object-pointer alternative was tested and rejected because those
+objects do not necessarily match the current submitted draw lists. The retained
+24-frame ordinary-controller grapple attempt contains 21 parts/777 triangles
+per actor with synchronized hashes and finite geometry. Move identity, paired
+contact and native combat remain unverified. Health HUD is explicitly last.

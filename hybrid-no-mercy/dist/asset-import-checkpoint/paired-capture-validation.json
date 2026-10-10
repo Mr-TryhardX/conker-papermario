@@ -1,0 +1,16 @@
+{
+  "frames_per_actor": 24,
+  "actor_indices": [
+    0,
+    1
+  ],
+  "synchronized_snapshot_hashes": true,
+  "synchronized_timestamps": true,
+  "parts_per_actor": 21,
+  "triangles_per_actor": 777,
+  "distinct_geometry_per_actor": [
+    24,
+    24
+  ],
+  "scope": "Ordinary controller grapple attempt in original ring; exact move identity and paired contact unverified; no Hybrid Heaven combat implementation"
+}
