@@ -1,6 +1,7 @@
 // Experimental model substitution, enabled explicitly by HH_KANE_IN_GAME.
 // Allocation belongs to librecomp's mod heap; no guessed scratch RAM is used.
 #include "librecomp/addresses.hpp"
+#include "hh_kane_motion.hpp"
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -20,10 +21,10 @@ struct Model {
     bool attempted=false;
     uint32_t address=0, active_root=0;
     std::vector<uint32_t> frames;
-    void load(uint8_t* ram) {
+    void load(uint8_t* ram,const char* variable="HH_KANE_MODEL_PATH") {
         if(attempted)return;
         attempted=true;
-        const char* path=std::getenv("HH_KANE_MODEL_PATH");
+        const char* path=std::getenv(variable);
         if(!path)return;
         std::ifstream file(path,std::ios::binary | std::ios::ate);
         if(!file)return;
@@ -60,6 +61,8 @@ struct Model {
     }
 };
 Model model;
+Model walk_model;
+KaneMotion motion;
 }
 extern "C" uint32_t hh_kane_override_begin(uint8_t* ram,uint32_t task,uint32_t* original) {
     static const bool enabled=std::getenv("HH_KANE_IN_GAME")!=nullptr;
@@ -71,8 +74,28 @@ extern "C" uint32_t hh_kane_override_begin(uint8_t* ram,uint32_t task,uint32_t* 
     model.load(ram);
     if(model.frames.empty())return 0;
     auto ms=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+    float x,z;
+    uint32_t bits=read(ram,data+4);std::memcpy(&x,&bits,4);
+    bits=read(ram,data+12);std::memcpy(&z,&bits,4);
+    bool moving=motion.sample(task,data,x,z,ms);
+    walk_model.load(ram,"HH_KANE_WALK_MODEL_PATH");
+    uint32_t pose=model.frames[(ms/120)%model.frames.size()];
+    bool walking=moving && !walk_model.frames.empty();
+    size_t frame=(ms/120)%model.frames.size();
+    if(walking) { frame=motion.frame(walk_model.frames.size());pose=walk_model.frames[frame]; }
+    static const char* probe=std::getenv("HH_KANE_MOTION_PROBE_PATH");
+    static bool observed=false,last_walking=false;
+    static uint32_t last_task=0;
+    static unsigned records=0;
+    if(probe && std::isfinite(x) && std::isfinite(z) && records<128 && (!observed || last_task!=task || walking!=last_walking)) {
+        if(FILE* file=std::fopen(probe,"a")) {
+            std::fprintf(file,"{\"task\":%u,\"mode\":\"%s\",\"frame\":%zu,\"x\":%.9g,\"z\":%.9g}\n",task,walking?"walk":"idle",frame,x,z);
+            std::fclose(file);++records;
+        }
+        observed=true;last_task=task;last_walking=walking;
+    }
     *original=geometry;
-    write(ram,data+0x28,model.frames[(ms/120)%model.frames.size()]);
+    write(ram,data+0x28,pose);
     // The custom list uses its own material; invalidate the renderer's material cache.
     write(ram,0x800892B0u+0x4298u,0);
     return data+0x28;

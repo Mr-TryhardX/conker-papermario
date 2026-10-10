@@ -30,10 +30,12 @@ EXPORT m64p_error CALL PluginGetVersion(m64p_plugin_type* type,int* version,int*
     return M64ERR_SUCCESS;
 }
 EXPORT void CALL InitiateControllers(CONTROL_INFO info){
-    for(int i=0;i<4;++i){info.Controls[i].Present=i==0;info.Controls[i].RawData=0;info.Controls[i].Plugin=PLUGIN_NONE;}
+    for(int i=0;i<4;++i){info.Controls[i].Present=i==0||(i==1&&getenv("MERCY_RESEARCH_TWO_PLAYERS"));info.Controls[i].RawData=0;info.Controls[i].Plugin=PLUGIN_NONE;}
 }
 EXPORT void CALL GetKeys(int controller,BUTTONS* keys){
-    keys->Value=0;if(controller!=0)return;capture_guest();const char* path=getenv("MERCY_RESEARCH_INPUT");if(!path)return;
+    keys->Value=0;if(controller<0||controller>1)return;
+    if(controller==0)capture_guest();
+    const char* path=getenv(controller==0?"MERCY_RESEARCH_INPUT":"MERCY_RESEARCH_INPUT_2");if(!path)return;
     FILE* file=fopen(path,"r");if(!file)return;unsigned mask=0;int x=0,y=0;
     if(fscanf(file,"%x %d %d",&mask,&x,&y)==3&&x>=-80&&x<=80&&y>=-80&&y<=80){keys->Value=mask&0xffff;keys->X_AXIS=x;keys->Y_AXIS=y;}
     fclose(file);

@@ -1,0 +1,9 @@
+{
+  "reference": "Original func_80012BE0 and eight dependencies",
+  "capture_sha256": "f4b625e5f1e0f6b33ca01558e2e982becd307ce27a554c7a1eb4b33b79b09435",
+  "joints": 20,
+  "matrix_elements": 320,
+  "result": "bit-exact match",
+  "maximum_error": 0.0,
+  "address_space": "private No Mercy memory"
+}

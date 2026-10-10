@@ -4,7 +4,7 @@ import json,math,struct,sys
 from pathlib import Path
 import numpy as np
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
-from extract_guest_actor import Guest,load_vertices,display_list
+from extract_guest_actor import Guest,load_vertices,display_list,actor_graphics_task,replay_actor_task
 
 ram=bytearray(0x800000)
 struct.pack_into('>hhhHhh4B',ram,256,2,3,4,0,64,96,255,255,255,255)
@@ -20,6 +20,31 @@ struct.pack_into('>II',ram,1024,0xde010000,1024)
 try:display_list(Guest(bytes(ram)),1024)
 except ValueError:pass
 else:raise AssertionError('Unbounded recursive display list accepted')
+# Actor and UI tasks coexist; stale DE commands after DF must not render.
+struct.pack_into('>16I',ram,0x380800,1,2,0x80040380,0xD0,
+    0x80042450,0x1000,0,0,0,0,0,0,0x80380000,40,0,0)
+struct.pack_into('>16h16H',ram,0x5000,*[1 if i%5==0 else 0 for i in range(16)],*[0]*16)
+commands=[(0xDB060004,0x2000),(0xDC38000E,0x5000),
+          (0x01001002,256),(0xDE000000,0x01000000),(0xDF000000,0),
+          (0xDE000000,0x3000)]
+for i,(a,b) in enumerate(commands):struct.pack_into('>II',ram,0x380000+i*8,a,b)
+struct.pack_into('>II',ram,0x2000,0xDF000000,0)
+parts=[{'bone':1,'display_list':0x2000,'faces':[[0,0,0]],'texture_size':[1,1]}]
+seen,task,dl,size=replay_actor_task(Guest(bytes(ram)),parts,identity)
+assert (seen,task,dl,size)==({1},0x380800,0x380000,40)
+assert parts[0]['vertices']==[[2,3,4,2,3]]
+# A shorter task cannot read a stale end/call beyond its submitted size.
+struct.pack_into('>I',ram,0x380800+0x34,24)
+try:replay_actor_task(Guest(bytes(ram)),parts,identity)
+except ValueError:pass
+else:raise AssertionError('Task replay escaped submitted size')
+struct.pack_into('>I',ram,0x380800+0x34,40)
+# UI task is distinct; two actor tasks must be rejected as ambiguous.
+ram[0x380900:0x380940]=ram[0x380800:0x380840]
+try:actor_graphics_task(Guest(bytes(ram)))
+except ValueError:pass
+else:raise AssertionError('Ambiguous actor task accepted')
+print('PASS: submitted actor task, nested segment calls, stale tail exclusion and task bounds.')
 root=Path(__file__).resolve().parents[1]/'asset-import/kane-animation'
 if root.exists():
     frames=json.loads((root/'poses.json').read_text())['poses'];assert len(frames)==40

@@ -89,6 +89,69 @@ def parse_part(g, obj, out):
             'clip_matrix':g.matrix(obj+0x38).tolist(),
             'reference_matrix':list(g.unpack('>16f',bone+0x1c))}
 
+def actor_graphics_task(g):
+    # No Mercy submits separate F3DEX2 actor and S2DEX UI tasks. The
+    # scheduler's scratch task at 0x8e6f0 can be the later UI submission.
+    # Locate the bounded resident F3DEX2 task, never a call beyond its size.
+    tasks=[]
+    marker=struct.pack('>II',1,2)
+    offset=0x380000
+    while True:
+        task=g.data.find(marker,offset,0x400000-56)
+        if task<0:break
+        offset=task+8
+        if task%8:continue
+        if g.word(task+8)&0xffffff!=0x40380:continue
+        if g.word(task+0x10)&0xffffff!=0x42450:continue
+        root=g.word(task+0x30)&0xffffff;size=g.word(task+0x34)
+        if 0x380000<=root<0x400000 and 8<=size<=0x20000 and size%8==0:
+            tasks.append((task,root,size))
+    if len(tasks)!=1:raise ValueError('Missing or ambiguous actor graphics task')
+    return tasks[0]
+
+def replay_actor_task(g,parts,inverse):
+    task,root,size=actor_graphics_task(g)
+    targets={p['display_list']:p for p in parts}
+    cache={};current=None;seen=set();segments=[0]*16
+    pc=root;limit=root+size;stack=[];budget=65536
+    while budget:
+        budget-=1
+        if pc%8 or not 0<=pc<=0x800000-8 or (limit is not None and pc+8>limit):
+            raise ValueError('Submitted command outside display-list bounds')
+        a,b=g.unpack('>II',pc);pc+=8;op=a>>24
+        def resolve(address):
+            segment=address>>24
+            if segment in (0x80,0xA0):
+                result=address&0xffffff
+            elif segment<16:result=segments[segment]+(address&0xffffff)
+            else:raise ValueError('Invalid display-list segment')
+            if not 0<=result<0x800000:raise ValueError('Resolved address outside guest RAM')
+            return result
+        if op==0xdb and ((a>>16)&255)==6:
+            segment=(a&0xffff)//4
+            if segment>=16:raise ValueError('Invalid segment assignment')
+            segments[segment]=b&0xffffff
+        elif op==0xdc and (a&255)==0x0e:
+            current=g.matrix(resolve(b))
+        elif op==1:
+            load_vertices(g,a,resolve(b),current,inverse,cache)
+        elif op==0xde:
+            target=resolve(b)
+            if target in targets:
+                p=targets[target];count=max(max(f) for f in p['faces'])+1
+                if any(i not in cache for i in range(count)):
+                    raise ValueError('Incomplete submitted vertex cache')
+                w,h=p['texture_size']
+                p['vertices']=[cache[i][:3]+[cache[i][3]/w,cache[i][4]/h] for i in range(count)]
+                p['matrix']=np.eye(4).tolist();seen.add(p['bone'])
+            if not (a>>16)&1:stack.append((pc,limit))
+            pc=target;limit=None
+        elif op==0xdf:
+            if not stack:break
+            pc,limit=stack.pop()
+    else:raise ValueError('Submitted display-list budget exceeded')
+    return seen,task,root,size
+
 def run(snapshot,out):
     data=snapshot.read_bytes();g=Guest(data);out.mkdir(parents=True,exist_ok=True)
     parts=[]
@@ -104,36 +167,16 @@ def run(snapshot,out):
     first=next(p for p in parts if abs(np.linalg.det(np.array(p['reference_matrix']).reshape(4,4)))>.1)
     camera=np.linalg.inv(np.array(first['reference_matrix']).reshape(4,4))@np.array(first['clip_matrix'])
     inverse=np.linalg.inv(camera)
-    # The caller fills a shared vertex cache in several chunks, sometimes using
-    # different bone matrices. The object's pointer is not vertex-cache slot 0.
-    targets={p['display_list']:p for p in parts};calls=[]
-    for target in targets:
-        needle=struct.pack('>II',0xde000000,target);at=data.find(needle);matches=[]
-        while at>=0:
-            if at%8==0 and 0x380000<=at<0x400000:matches.append(at)
-            at=data.find(needle,at+1)
-        if matches:calls.append(max(matches))
-    if len(calls)!=len(parts):raise ValueError('Could not locate unique actor draw calls')
-    cache={};current=None;seen=set()
-    for pc in range(min(calls)-512,max(calls)+8,8):
-        a,b=g.unpack('>II',pc);op=a>>24
-        if op==0xdc and (a&255)==0x0e:current=g.matrix(b)
-        elif op==1 and current is not None:
-            # The bounded preamble can begin inside another actor's draw.
-            # Ignore its loads until a force-matrix establishes this cache.
-            load_vertices(g,a,b,current,inverse,cache)
-        elif op==0xde and (b&0xffffff) in targets:
-            p=targets[b&0xffffff];count=max(max(f) for f in p['faces'])+1
-            if any(i not in cache for i in range(count)):raise ValueError('Incomplete vertex cache')
-            w,h=p['texture_size'];p['vertices']=[cache[i][:3]+[cache[i][3]/w,cache[i][4]/h] for i in range(count)]
-            p['matrix']=np.eye(4).tolist();seen.add(p['bone'])
+    seen,task,root,size=replay_actor_task(g,parts,inverse)
     if len(seen)!=len(parts):raise ValueError('Missing draw parts')
     for p in parts:
         p.pop('clip_matrix')
         p.pop('reference_matrix')
         if not all(math.isfinite(v) for row in p['matrix'] for v in row):raise ValueError('Nonfinite actor transform')
     record={'source':'No Mercy original renderer reference pose; no skeletal codec inferred',
-            'snapshot_sha256':hashlib.sha256(data).hexdigest(),'parts':parts}
+            'snapshot_sha256':hashlib.sha256(data).hexdigest(),
+            'graphics_task':task,'display_list_root':root,'display_list_bytes':size,
+            'actor_root_matrix':list(g.unpack('>16f',0x91cc0+0x1c)),'parts':parts}
     (out/'actor.json').write_text(json.dumps(record)+'\n')
     print(f'Reconstructed {len(parts)} textured draw parts, {sum(len(p["faces"]) for p in parts)} triangles')
 

@@ -13,7 +13,7 @@ def run(args):
     if result.returncode:raise RuntimeError(result.stderr[:12000])
     return result.stdout
 
-def build(source,out,frames=40,scale=10.0,gbi=None):
+def build(source,out,frames=40,scale=10.0,gbi=None,yaw_degrees=180):
     poses=json.loads((source/'poses.json').read_text())['poses'][:frames]
     if not poses:raise ValueError('No poses')
     out.mkdir(parents=True,exist_ok=True)
@@ -45,7 +45,9 @@ def build(source,out,frames=40,scale=10.0,gbi=None):
                 if len(face)!=3:raise ValueError('Nontriangle')
                 for vi in face:
                     x,y,z,u,v=part['vertices'][vi]
-                    xyz=[round(c*scale) for c in (x,y,z)]
+                    angle=math.radians(yaw_degrees)
+                    rotated=(x*math.cos(angle)+z*math.sin(angle),y,-x*math.sin(angle)+z*math.cos(angle))
+                    xyz=[round(c*scale) for c in rotated]
                     uv=[round(u*w*32),round(v*h*32)]
                     if any(c < -32768 or c>32767 for c in xyz+uv):raise ValueError('N64 Vtx overflow')
                     verts.append('{{{'+','.join(map(str,xyz))+'},0,{'+','.join(map(str,uv))+'},{255,255,255,255}}}')
@@ -80,10 +82,11 @@ def build(source,out,frames=40,scale=10.0,gbi=None):
     header=struct.pack('<4sIIII',b'KNDL',1,len(poses),len(data),len(relocs))
     metadata=struct.pack('<'+'I'*(len(offsets)+len(relocs)),*(offsets+relocs))
     (out/'kane-displaylists.bin').write_bytes(header+metadata+data)
-    report={'frames':len(poses),'parts_per_frame':len(poses[0]['parts']),'triangles_per_frame':sum(len(p['faces']) for p in poses[0]['parts']),'vertices_total':total,'body_bytes':len(data),'relocations':len(relocs),'vertex_scale':scale,'source':'Original-renderer reference poses; gameplay animation integration remains pending'}
+    report={'frames':len(poses),'parts_per_frame':len(poses[0]['parts']),'triangles_per_frame':sum(len(p['faces']) for p in poses[0]['parts']),'vertices_total':total,'body_bytes':len(data),'relocations':len(relocs),'vertex_scale':scale,'yaw_degrees':yaw_degrees,'source':'Original-renderer reference poses; gameplay animation integration remains pending'}
     (out/'displaylist-validation.json').write_text(json.dumps(report,indent=2)+'\n')
     return report
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--source',type=Path,default=ROOT/'asset-import/kane-animation');p.add_argument('--output',type=Path,default=ROOT/'asset-import/kane-displaylists');p.add_argument('--frames',type=int,default=40);p.add_argument('--scale',type=float,default=10);p.add_argument('--gbi',type=Path,help='Complete libultra F3DEX2 gbi.h; auto-detects the local Paper Mario header')
-    a=p.parse_args();print(json.dumps(build(a.source,a.output,a.frames,a.scale,a.gbi),indent=2))
+    p.add_argument('--yaw-degrees',type=float,default=180,help='Match No Mercy forward to the Hybrid Heaven root model axis')
+    a=p.parse_args();print(json.dumps(build(a.source,a.output,a.frames,a.scale,a.gbi,a.yaw_degrees),indent=2))

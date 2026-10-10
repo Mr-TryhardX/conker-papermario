@@ -8,13 +8,15 @@ void* alloc(uint8_t* ram,size_t size) { assert(size<0x200000); return ram+0x1000
 void free(uint8_t*,void*) { assert(false && "Unexpected invalid allocation"); }
 }
 int main(int argc,char** argv) {
-    assert(argc==2);
+    assert(argc==2 || argc==3);
+    size_t expected=argc==3 ? std::strtoul(argv[2],nullptr,10) : 40;
+    assert(expected>0 && expected<=120);
     setenv("HH_KANE_MODEL_PATH",argv[1],1);
     setenv("HH_KANE_IN_GAME","1",1);
     std::vector<uint8_t> ram(0x1400000,0xA5);
     Model fixture;
     fixture.load(ram.data());
-    assert(fixture.frames.size()==40 && fixture.address==0x81000100);
+    assert(fixture.frames.size()==expected && fixture.address==0x81000100);
     assert(ram[0x10000FF]==0xA5 && ram[0x1200100]==0xA5);
     for(auto frame:fixture.frames) {
         size_t o=frame-0x80000000u;
@@ -82,5 +84,5 @@ int main(int argc,char** argv) {
     setenv("HH_KANE_MODEL_PATH",invalid.c_str(),1);
     Model rejected;rejected.load(ram.data());assert(rejected.frames.empty());
     std::filesystem::remove(invalid);
-    std::puts("Kane model: 40 native lists, endian conversion, owned allocation, eligibility, pointer restoration and malformed archive checks passed.");
+    std::printf("Kane model: %zu native lists, endian conversion, owned allocation, eligibility, pointer restoration and malformed archive checks passed.\n",expected);
 }

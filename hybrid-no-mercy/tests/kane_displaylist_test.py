@@ -3,7 +3,8 @@ import struct,sys
 from pathlib import Path
 p=Path(sys.argv[1]);raw=p.read_bytes()
 magic,version,frames,size,relocs=struct.unpack_from('<4sIIII',raw)
-assert magic==b'KNDL' and version==1 and frames==40
+expected_frames=int(sys.argv[2]) if len(sys.argv)>2 else 40
+assert magic==b'KNDL' and version==1 and 1<=frames<=120 and frames==expected_frames
 metadata=struct.unpack_from('<'+'I'*(frames+relocs),raw,20)
 body=raw[20+4*(frames+relocs):];assert len(body)==size
 for r in metadata[frames:]:
