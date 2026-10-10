@@ -6,14 +6,23 @@ the known integration points and preserves every other source change.
 from pathlib import Path
 import shutil
 
+def copy_if_changed(source,destination):
+    source,destination=Path(source),Path(destination)
+    if destination.exists() and destination.read_bytes()==source.read_bytes():return
+    shutil.copyfile(source,destination)
+
+def write_if_changed(path,text):
+    if path.exists() and path.read_text()==text:return
+    path.write_text(text)
+
 root=Path(__file__).resolve().parents[1]
 game=root/"native/HybridHeaven"
 for name in ["career.hpp","career.cpp"]:
     dest=game/"src/career"/name;dest.parent.mkdir(exist_ok=True)
-    shutil.copyfile(root/"src"/name,dest)
+    copy_if_changed(root/"src"/name,dest)
 for name in ["ui_career.h","ui_career.cpp","ui_nomercy_preview.h","ui_nomercy_preview.cpp","nomercy_audio.h","nomercy_audio.cpp","ui_nomercy_actor.h","ui_nomercy_actor.cpp"]:
-    shutil.copyfile(root/"integration"/name,game/"src/ui"/name)
-shutil.copyfile(root/"integration/career.rml",game/"assets/config_menu/career.rml")
+    copy_if_changed(root/"integration"/name,game/"src/ui"/name)
+copy_if_changed(root/"integration/career.rml",game/"assets/config_menu/career.rml")
 
 def edit(relative,marker,old,new):
     path=game/relative;source=path.read_text()
@@ -38,7 +47,7 @@ if converted.exists():
 audio=game/"assets/nomercy/audio"
 audio.mkdir(parents=True,exist_ok=True)
 for name,source in [("shop.wav","assets/audio/no-mercy-shop.wav"),("Kane.wav","assets/audio/entrances/Kane.wav"),("The-Rock.wav","assets/audio/entrances/The-Rock.wav")]:
-    if (root/source).exists():shutil.copyfile(root/source,audio/name)
+    if (root/source).exists():copy_if_changed(root/source,audio/name)
     else:print("Missing captured music:",source)
 bank=root/"asset-import/nomercy/audio/bank1"
 if bank.exists():shutil.copytree(bank,audio/"bank1",dirs_exist_ok=True)
@@ -50,6 +59,27 @@ edit("src/ui/ui_elements.cpp", 'CUSTOM_ELEMENT("nomercy-actor"', 'static RecompC
 actor=root/"asset-import/kane-native"
 if actor.exists():shutil.copytree(actor,game/"assets/nomercy/actor",dirs_exist_ok=True)
 
-shutil.copyfile(root/"integration/hh_player_probe.hpp",game/"src/main/hh_player_probe.hpp")
+copy_if_changed(root/"integration/hh_player_probe.hpp",game/"src/main/hh_player_probe.hpp")
 edit("src/main/rt64_render_context.cpp", '#include "hh_player_probe.hpp"', '#include <algorithm>', '#include <algorithm>\n#include "hh_player_probe.hpp"')
 edit("src/main/rt64_render_context.cpp", 'hh_player_probe::tick(app->core.RDRAM);', '    frame_probe.frame_start(hh_overlay_load_count());', '    frame_probe.frame_start(hh_overlay_load_count());\n    hh_player_probe::tick(app->core.RDRAM);')
+
+# Preserve the original emitter, generated from the user's local game, under a
+# second name. The opt-in wrapper can observe it without copying original code
+# into the delivery repository or guessing its behavior.
+original=game/"RecompiledFuncs/funcs_47.c"
+source=original.read_text()
+start=source.index("RECOMP_FUNC void func_8000C768_D368(")
+end=source.index("\nRECOMP_FUNC ",start+1)
+body=source[start:end].replace("RECOMP_FUNC void func_8000C768_D368(","static void hh_original_actor_draw(",1)
+write_if_changed(game/"src/game/hh_actor_draw_original.inc",body)
+copy_if_changed(root/"integration/hh_actor_draw.c",game/"src/game/hh_actor_draw.c")
+edit("CMakeLists.txt", "src/game/hh_actor_draw.c", "target_include_directories(HybridHeavenRecompiled PRIVATE ${HH_RECOMP_INCLUDES})", "target_include_directories(HybridHeavenRecompiled PRIVATE ${HH_RECOMP_INCLUDES})\ntarget_sources(HybridHeavenRecompiled PRIVATE ${CMAKE_SOURCE_DIR}/src/game/hh_actor_draw.c)")
+
+copy_if_changed(root/"integration/hh_kane_model.cpp",game/"src/game/hh_kane_model.cpp")
+edit("CMakeLists.txt", "src/game/hh_kane_model.cpp", "target_sources(HybridHeavenRecompiled PRIVATE ${CMAKE_SOURCE_DIR}/src/game/hh_actor_draw.c)", "target_sources(HybridHeavenRecompiled PRIVATE ${CMAKE_SOURCE_DIR}/src/game/hh_actor_draw.c ${CMAKE_SOURCE_DIR}/src/game/hh_kane_model.cpp)")
+
+# Remove only our earlier experimental whole-frame mode: original commands
+# can contain hardware-masked addresses that must keep their normal semantics.
+p=game/"src/main/rt64_render_context.cpp"
+s=p.read_text();s=s.replace('\n    // Kane model heap needs RT64 extended RDRAM; keep the default path unchanged.\n    if (std::getenv("HH_KANE_IN_GAME") != nullptr) app->state->setExtendedRDRAM(true);','')
+write_if_changed(p,s)
