@@ -105,3 +105,11 @@ existing reference and malformed-data checks pass. One ring snapshot reconstruct
 21 parts/777 triangles, but continuous in-ring capture remains blocked: stale
 draw-list calls after an end marker can select an incomplete vertex cache.
 Failed captures remain separate and are not promoted to animation archives.
+
+
+Final live check of the ancestry change: Kane renders alone in the original
+first corridor, with no visible Johnny overlap. A one-second W input moved
+the player to (-300, 490.25, 241.386215), and the camera followed. The native
+process continued without a renderer crash. The attached short corridor clip
+shows captured idle reference poses, not a completed wrestling animation set.
+Full combat, finishers and Windows packaging remain outstanding.
