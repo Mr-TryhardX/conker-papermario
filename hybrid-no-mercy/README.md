@@ -1,3 +1,5 @@
+The current goal is the full Hybrid Heaven campaign with No Mercy assets. See [asset integration checkpoint](ASSET_INTEGRATION.md) for verified imports and unfinished gameplay bindings.
+
 # Hybrid / No Mercy — Career Systems Lab
 
 The newer **Animated World Prototype** adds a playable 3D facility and visible attacks and finishers. See [ANIMATED_DEMO.md](ANIMATED_DEMO.md) and run `AnimatedDemo.exe` from that download. The original menu-only lab remains available below.

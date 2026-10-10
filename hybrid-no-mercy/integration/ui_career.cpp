@@ -1,4 +1,6 @@
 #include "ui_career.h"
+#include "ui_nomercy_preview.h"
+#include "nomercy_audio.h"
 #include "../career/career.hpp"
 #include <functional>
 
@@ -24,6 +26,8 @@ void refresh() {
     for(int i=0;i<career::encounter_count;++i)encounters.push_back(std::string(career::encounters[i].name)+(game.state.cleared[i]?" / cleared":""));
 }
 void act(const std::string& action,int index) {
+    if(action=="audio"){recompui::nomercy_audio_action(index);message="No Mercy audio audition. Sample event identification is pending.";return;}
+    if(action=="preview"){recompui::nomercy_preview_select(index);message="Imported No Mercy mesh part "+std::to_string(index+1)+" of 20. Skeleton binding pending.";return;}
     if(!writable){message="Career save could not be read. Changes are disabled to protect it.";return;}
     const auto before=game;bool changed=false;
     if(action=="select")changed=game.select(index,message);

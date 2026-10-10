@@ -9,6 +9,13 @@
 <body><div id="career-content" class="career-lab">
 <h2>Hybrid / No Mercy — Career Lab</h2>
 <p>Systems prototype. These encounters do not affect Hybrid Heaven's exploration or combat. Wrestler models, attire visuals and imported animations are pending.</p>
+<h2>Real No Mercy assets — import bench</h2>
+<p>Original Kane portraits, mask and attire textures are decoded from your ROM. The rotating view shows real Medium body meshes. These are import checks; the full wrestler skeleton and story gameplay are not connected yet.</p>
+<div style="display:flex; height:260dp;"><nomercy-preview style="display:block; width:320dp; height:250dp;" /><img src="?/nomercy/45B6" style="width:150dp;height:150dp;" /><img src="?/nomercy/2650" style="width:64dp;height:128dp;" /><img src="?/nomercy/1893" style="width:64dp;height:128dp;" /></div>
+<button data-event-click="career_action('preview',0)">Chest</button><button data-event-click="career_action('preview',2)">Pelvis</button><button data-event-click="career_action('preview',6)">Upper arm</button><button data-event-click="career_action('preview',10)">Upper leg</button><button data-event-click="career_action('preview',12)">Foot</button>
+<p>Audio import audition. Shop and entrance clips were recorded from your ROM; bank samples below are decoded original sound data with event names still unidentified. Audio pauses when this bench is hidden.</p>
+<button data-event-click="career_action('audio',0)">Shop music</button><button data-event-click="career_action('audio',1)">Kane theme</button><button data-event-click="career_action('audio',2)">Rock theme</button><button data-event-click="career_action('audio',3)">Mute imported audio</button>
+<button data-event-click="career_action('audio',100)">Sample 0</button><button data-event-click="career_action('audio',101)">Sample 1</button><button data-event-click="career_action('audio',102)">Sample 2</button><button data-event-click="career_action('audio',103)">Sample 3</button><button data-event-click="career_action('audio',104)">Sample 4</button><button data-event-click="career_action('audio',105)">Sample 5</button>
 <h2>{{name}}</h2><p>{{status}}</p><p>{{perk}}</p><p>{{progress}}</p><p>{{message}}</p>
 <h2>Roster and attire slots</h2>
 <button data-for="fighter, fighter_index : roster" data-event-click="career_action('select',fighter_index)">{{fighter}}</button>

@@ -1,0 +1,30 @@
+{
+  "scope": "Native Linux import bench, not a complete actor replacement or Windows campaign build",
+  "archive_entries": 19461,
+  "meshes_checked": 3586,
+  "animations_framing_checked": 5789,
+  "default_costumes_read": 260,
+  "kane_textures_converted": 45,
+  "bank_samples_decoded": 293,
+  "reference_pcm_matches": 9,
+  "parser_and_asset_consistency_checks": 9682,
+  "native_build": "PASS",
+  "native_render": "actual textures and rotating imported mesh parts verified",
+  "native_audio": {
+    "shop_peak_db": -8.9,
+    "kane_peak_db": -8.9,
+    "sample0_peak_db": -7.4,
+    "explicit_mute_peak_db": -91,
+    "hidden_tab_peak_db": -91
+  },
+  "remaining": [
+    "skeletal pose decoding",
+    "complete Kane assembly",
+    "actor/render hook",
+    "paired moves and finishers",
+    "game event audio mapping",
+    "first level validation",
+    "full campaign progression",
+    "Windows campaign package"
+  ]
+}

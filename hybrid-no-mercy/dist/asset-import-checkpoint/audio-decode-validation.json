@@ -1,0 +1,56 @@
+[
+  {
+    "bank": "bank0",
+    "index": 0,
+    "samples": 12720,
+    "reference_match": true
+  },
+  {
+    "bank": "bank0",
+    "index": 1,
+    "samples": 8480,
+    "reference_match": true
+  },
+  {
+    "bank": "bank0",
+    "index": 10,
+    "samples": 127120,
+    "reference_match": true
+  },
+  {
+    "bank": "bank1",
+    "index": 0,
+    "samples": 17056,
+    "reference_match": true
+  },
+  {
+    "bank": "bank1",
+    "index": 1,
+    "samples": 29680,
+    "reference_match": true
+  },
+  {
+    "bank": "bank1",
+    "index": 10,
+    "samples": 3184,
+    "reference_match": true
+  },
+  {
+    "bank": "bank2",
+    "index": 0,
+    "samples": 328176,
+    "reference_match": true
+  },
+  {
+    "bank": "bank2",
+    "index": 1,
+    "samples": 290624,
+    "reference_match": true
+  },
+  {
+    "bank": "bank2",
+    "index": 10,
+    "samples": 435248,
+    "reference_match": true
+  }
+]
