@@ -1,0 +1,18 @@
+{
+  "result": "finite distinct skeleton poses for both equal-length timelines",
+  "records": [
+    {
+      "id": "34EB",
+      "actor_index": 0,
+      "frames": 69,
+      "distinct_matrix_sets": 69
+    },
+    {
+      "id": "34EC",
+      "actor_index": 1,
+      "frames": 69,
+      "distinct_matrix_sets": 69
+    }
+  ],
+  "scope": "Offline private No Mercy memory; distinct captured actor slots; no paired anchors/contact or live combat verified"
+}

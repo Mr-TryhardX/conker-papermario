@@ -133,3 +133,9 @@ Chris Benoit mesh extracts as 21 parts/777 triangles; all 20 matrices match
 the original builder bit for bit, and record 34EC produces 69 distinct finite
 defender poses. A second-actor synthetic check verifies vertex binding
 isolation. Paired world anchors/contact still need original-game validation.
+
+The paired skeleton checker now uses distinct captured actor slots by default
+(attacker 0, defender 1), including their separate pose arrays. Both timelines
+again produce 69 finite distinct matrix sets. The exact-local attacker archive
+also compiles and passes native display-list and owned-loader checks at
+2998224 bytes/7383 relocations; it has not replaced the active recorded build.

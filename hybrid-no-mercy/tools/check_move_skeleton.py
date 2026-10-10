@@ -13,7 +13,10 @@ def main():
     parser.add_argument('capture',type=Path)
     parser.add_argument('--attacker',default='34EB')
     parser.add_argument('--defender',default='34EC')
+    parser.add_argument('--attacker-index',type=int,choices=range(4),default=0)
+    parser.add_argument('--defender-index',type=int,choices=range(4),default=1)
     args=parser.parse_args()
+    if args.attacker_index==args.defender_index:raise ValueError('Paired move requires distinct actor slots')
     root=Path(__file__).resolve().parents[1]
     base=args.capture.resolve().read_bytes()
     if len(base)!=0x800000:raise ValueError('Expected 8 MiB logical capture')
@@ -28,26 +31,26 @@ def main():
     work=root/'artifacts/move-skeleton-reference';work.mkdir(parents=True,exist_ok=True)
     executable=root/'artifacts/skeleton-reference/reference-skeleton'
     summaries=[]
-    for name,frames in zip([args.attacker,args.defender],records):
+    for name,frames,actor in zip([args.attacker,args.defender],records,[args.attacker_index,args.defender_index]):
         hashes=set()
         for frame in frames:
             # A fresh private snapshot per frame avoids carrying prior frames
             # into the check. Non-translated joints retain captured bindings.
             ram=bytearray(base)
             for joint in frame:
-                offset=0xA1130+joint['joint']*124
+                offset=0xA1130+actor*2852+joint['joint']*124
                 struct.pack_into('>3f',ram,offset,*joint['angles_degrees_xyz'])
                 if joint['translation_xyz'] is not None:
                     struct.pack_into('>3f',ram,offset+12,*joint['translation_xyz'])
             scratch=work/'private-frame.ram';scratch.write_bytes(ram)
-            result=subprocess.run([executable,scratch],stdout=subprocess.PIPE,check=True).stdout
+            result=subprocess.run([executable,scratch,str(actor)],stdout=subprocess.PIPE,check=True).stdout
             if len(result)!=1280 or not all(math.isfinite(v) for v in struct.unpack('<320f',result)):
                 raise AssertionError('Invalid matrix output')
             hashes.add(hashlib.sha256(result).hexdigest())
         if len(hashes)<2:raise AssertionError('Move produced no distinct skeleton poses')
-        summaries.append({'id':name,'frames':len(frames),'distinct_matrix_sets':len(hashes)})
+        summaries.append({'id':name,'actor_index':actor,'frames':len(frames),'distinct_matrix_sets':len(hashes)})
     report={'result':'finite distinct skeleton poses for both equal-length timelines',
-            'records':summaries,'scope':'Offline private No Mercy memory; no live combat or opponent binding verified'}
+            'records':summaries,'scope':'Offline private No Mercy memory; distinct captured actor slots; no paired anchors/contact or live combat verified'}
     (work/'validation.json').write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps(report,indent=2))
 
