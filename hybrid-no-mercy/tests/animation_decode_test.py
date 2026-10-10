@@ -11,6 +11,7 @@ for i in range(18):
     if i<6:record+=bytes([2,0x84,1])
 assert len(record)==98
 j=decode_frame(record)
+assert [x['joint'] for x in j]==list(range(1,20))
 assert j[0]['angles_degrees_xyz']==[180,0,359.6484375]
 assert j[0]['translation_xyz']==[10,-20,-30]
 assert j[1]['translation_xyz']==[11,-22,-29.5]

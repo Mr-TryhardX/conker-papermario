@@ -90,3 +90,23 @@ produce finite matrices, and all 69 matrix sets per side differ. This offline
 check uses the same captured actor binding separately for each side; it does
 not validate an opponent mesh, attachment transforms, paired contact, frame
 interpolation, collision, hit timing, damage or playable combat.
+
+Decoded-geometry follow-up: the original stream loader (func_80013234) writes
+joints 1..19 sequentially; table 80047EF8 is update order, not storage order.
+The earlier remap interpretation was wrong and produced separated limbs.
+The decoder is corrected, and ten reference frames now match the original
+loader AND decoder in their actual runtime slots, including unset translations.
+All 152778 frames were regenerated locally in asset-import/decoded-animation-v2;
+the earlier decoded-animation directory is retained but its joint labels are
+obsolete. The authored geometry baker preserves per-vertex bone provenance
+for shared vertex-cache slots and attaches local costume matrices to parents.
+All 681 reference vertex bindings resolve.
+
+The corrected offline Chokeslam from Hell attacker produces 69 connected
+rendered poses (21 parts, 777 triangles). Its 2998224-byte native display-list
+body and 7383 relocations pass archive and loader checks. The test allocation
+fixture now covers the production loader's existing 8 MiB limit and verifies
+canaries at the actual allocation boundary; 10/20/69-pose tests all pass.
+The new silent H.264 preview plays these decoded geometry poses at a chosen
+20 frames per second. It is an offline attacker-only preview, without an
+opponent or live combat/damage/music. No full playable finisher is claimed.

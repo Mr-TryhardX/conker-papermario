@@ -4,7 +4,8 @@
 #include <limits>
 
 namespace recomp {
-void* alloc(uint8_t* ram,size_t size) { assert(size<0x200000); return ram+0x1000100; }
+size_t allocated_size=0;
+void* alloc(uint8_t* ram,size_t size) { assert(size<=0x800000); allocated_size=size; return ram+0x1000100; }
 void free(uint8_t*,void*) { assert(false && "Unexpected invalid allocation"); }
 }
 int main(int argc,char** argv) {
@@ -13,11 +14,11 @@ int main(int argc,char** argv) {
     assert(expected>0 && expected<=120);
     setenv("HH_KANE_MODEL_PATH",argv[1],1);
     setenv("HH_KANE_IN_GAME","1",1);
-    std::vector<uint8_t> ram(0x1400000,0xA5);
+    std::vector<uint8_t> ram(0x1800101,0xA5);
     Model fixture;
     fixture.load(ram.data());
     assert(fixture.frames.size()==expected && fixture.address==0x81000100);
-    assert(ram[0x10000FF]==0xA5 && ram[0x1200100]==0xA5);
+    assert(ram[0x10000FF]==0xA5 && ram[0x1000100+recomp::allocated_size]==0xA5);
     for(auto frame:fixture.frames) {
         size_t o=frame-0x80000000u;
         uint32_t op; std::memcpy(&op,ram.data()+o,4);

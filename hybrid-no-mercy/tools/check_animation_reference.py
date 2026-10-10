@@ -10,7 +10,7 @@ from decode_nomercy_animation import decode_frame
 root=Path(__file__).resolve().parents[1];work=root/'artifacts/animation-reference';work.mkdir(parents=True,exist_ok=True)
 rom=root/'roms/WWF No Mercy (USA) (Rev 1).z64'
 if hashlib.sha1(rom.read_bytes()).hexdigest()!='91cee3d096f4a76644d8b35b9aead6448909abd1':raise ValueError('Wrong reference ROM')
-(work/'symbols.toml').write_text('[[section]]\nname="decoder"\nrom=0x141D0\nvram=0x800135D0\nsize=0x290\nfunctions=[{name="func_800135D0",vram=0x800135D0,size=0x290}]\n')
+(work/'symbols.toml').write_text('[[section]]\nname="decoder"\nrom=0x13E34\nvram=0x80013234\nsize=0x62C\nfunctions=[{name="func_80013234",vram=0x80013234,size=0xA4},{name="func_800135D0",vram=0x800135D0,size=0x290}]\n')
 (work/'recomp.toml').write_text('[input]\nrom_file_path='+json.dumps(str(rom))+'\nsymbols_file_path="symbols.toml"\noutput_func_path="generated"\n')
 subprocess.run([root/'native/HybridHeaven/build-n64recomp/N64Recomp','recomp.toml'],cwd=work,check=True)
 include=root/'native/HybridHeaven/lib/N64ModernRuntime/N64Recomp/include'
@@ -26,9 +26,10 @@ if len(result.stdout)!=len(frames)*19*6*4:raise ValueError('Short original decod
 values=struct.unpack('<'+str(len(result.stdout)//4)+'f',result.stdout)
 for f,frame in enumerate(frames):
     for i,joint in enumerate(decode_frame(frame)):
+        if joint['joint']!=i+1:raise AssertionError('Decoder slot differs from original loader slot')
         got=values[f*114+i*6:f*114+i*6+6]
         want=joint['angles_degrees_xyz']+(joint['translation_xyz'] or [math.nan]*3)
         if not all((math.isnan(a)and math.isnan(b))or a==b for a,b in zip(got,want)):raise AssertionError((f,i,got,want))
-report={'reference':'Unmodified func_800135D0 recompiled from supplied ROM','frames':len(frames),'joints_per_frame':19,'result':'exact float match including unset translations'}
+report={'reference':'Unmodified func_80013234 loader and func_800135D0 decoder recompiled from supplied ROM','frames':len(frames),'joints_per_frame':19,'result':'exact float match in sequential runtime joint slots, including unset translations'}
 (root/'artifacts/animation-decode-validation.json').write_text(json.dumps(report,indent=2)+'\n')
 print(f'PASS: {len(frames)} frames exactly match original MIPS decoder float results.')

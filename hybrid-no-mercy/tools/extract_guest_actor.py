@@ -112,7 +112,17 @@ def actor_graphics_task(g):
 def replay_actor_task(g,parts,inverse):
     task,root,size=actor_graphics_task(g)
     targets={p['display_list']:p for p in parts}
-    cache={};current=None;seen=set();segments=[0]*16
+    cache={};bindings={};matrix_targets={};current=None;current_bone=None;current_address=None;seen=set();segments=[0]*16
+    matrix_bones={p['object']+0x38:p['bone'] for p in parts if 'object' in p}
+    # Non-drawing joints can load shared vertices used by another draw part.
+    for bone in range(0x91cc0,0x93160+1,0xdc):
+        obj=g.word(bone+0x14)&0xffffff
+        if 0<obj<0x800000-0x78:matrix_bones[obj+0x38]=bone
+    for i in range(128):
+        obj=g.word(0x61d40+i*4)&0xffffff
+        if not 0<obj<0x800000-0x78 or g.word(obj)!=1:continue
+        bone=g.word(obj+4)&0xffffff
+        if 0x91cc0<=bone<=0x93160:matrix_bones[obj+0x38]=bone
     pc=root;limit=root+size;stack=[];budget=65536
     while budget:
         budget-=1
@@ -132,9 +142,17 @@ def replay_actor_task(g,parts,inverse):
             if segment>=16:raise ValueError('Invalid segment assignment')
             segments[segment]=b&0xffffff
         elif op==0xdc and (a&255)==0x0e:
-            current=g.matrix(resolve(b))
+            address=resolve(b)
+            current=g.matrix(address);current_bone=matrix_bones.get(address);current_address=address
+            if current_bone is None and address>=0x38 and g.word(address-0x38)==1:
+                bone=g.word(address-0x34)&0xffffff
+                if 0x91cc0<=bone<=0x93160 and (bone-0x91cc0)%0xdc==0:
+                    current_bone=bone
         elif op==1:
             load_vertices(g,a,resolve(b),current,inverse,cache)
+            n=(a>>12)&255;start=((a>>1)&127)-n
+            for i in range(start,start+n):
+                bindings[i]=current_bone;matrix_targets[i]=current_address
         elif op==0xde:
             target=resolve(b)
             if target in targets:
@@ -143,6 +161,8 @@ def replay_actor_task(g,parts,inverse):
                     raise ValueError('Incomplete submitted vertex cache')
                 w,h=p['texture_size']
                 p['vertices']=[cache[i][:3]+[cache[i][3]/w,cache[i][4]/h] for i in range(count)]
+                p['vertex_bones']=[bindings.get(i) for i in range(count)]
+                p['vertex_matrix_targets']=[matrix_targets.get(i) for i in range(count)]
                 p['matrix']=np.eye(4).tolist();seen.add(p['bone'])
             if not (a>>16)&1:stack.append((pc,limit))
             pc=target;limit=None

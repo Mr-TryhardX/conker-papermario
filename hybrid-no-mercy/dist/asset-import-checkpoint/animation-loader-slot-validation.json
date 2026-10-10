@@ -1,0 +1,6 @@
+{
+  "reference": "Unmodified func_80013234 loader and func_800135D0 decoder recompiled from supplied ROM",
+  "frames": 10,
+  "joints_per_frame": 19,
+  "result": "exact float match in sequential runtime joint slots, including unset translations"
+}

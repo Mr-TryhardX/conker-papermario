@@ -24,6 +24,8 @@ else:raise AssertionError('Unbounded recursive display list accepted')
 struct.pack_into('>16I',ram,0x380800,1,2,0x80040380,0xD0,
     0x80042450,0x1000,0,0,0,0,0,0,0x80380000,40,0,0)
 struct.pack_into('>16h16H',ram,0x5000,*[1 if i%5==0 else 0 for i in range(16)],*[0]*16)
+# A matrix loaded by a non-drawing object still owns its shared vertices.
+struct.pack_into('>II',ram,0x5000-0x38,1,0x80091D9C)
 commands=[(0xDB060004,0x2000),(0xDC38000E,0x5000),
           (0x01001002,256),(0xDE000000,0x01000000),(0xDF000000,0),
           (0xDE000000,0x3000)]
@@ -33,6 +35,8 @@ parts=[{'bone':1,'display_list':0x2000,'faces':[[0,0,0]],'texture_size':[1,1]}]
 seen,task,dl,size=replay_actor_task(Guest(bytes(ram)),parts,identity)
 assert (seen,task,dl,size)==({1},0x380800,0x380000,40)
 assert parts[0]['vertices']==[[2,3,4,2,3]]
+assert parts[0]['vertex_bones']==[0x91D9C]
+assert parts[0]['vertex_matrix_targets']==[0x5000]
 # A shorter task cannot read a stale end/call beyond its submitted size.
 struct.pack_into('>I',ram,0x380800+0x34,24)
 try:replay_actor_task(Guest(bytes(ram)),parts,identity)
