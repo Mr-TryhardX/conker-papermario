@@ -77,3 +77,16 @@ observed corridor speed. The cycle now spans 80 movement units. A deterministic
 check verifies quarter-cycle advances and wraparound over that distance,
 and the native executable rebuild passed. Live cadence validation is pending;
 the earlier video shows the initial faster cadence.
+
+Latest live follow-up: the rebuilt 80-unit walking cycle rendered in the
+original first corridor; W moved the player to (-300,490.25,191.719772),
+original camera follow continued, and releasing W selected standing again.
+This supersedes the earlier pending live-cadence check.
+
+`python3 tools/check_move_skeleton.py artifacts/nomercy-forward-walk-last.ram`
+checks original records 34EB and 34EC (Chokeslam from Hell attacker and
+defender) through the verified matrix builder. Both have 69 frames, all
+produce finite matrices, and all 69 matrix sets per side differ. This offline
+check uses the same captured actor binding separately for each side; it does
+not validate an opponent mesh, attachment transforms, paired contact, frame
+interpolation, collision, hit timing, damage or playable combat.

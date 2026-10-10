@@ -1,0 +1,16 @@
+{
+  "result": "finite distinct skeleton poses for both equal-length timelines",
+  "records": [
+    {
+      "id": "34EB",
+      "frames": 69,
+      "distinct_matrix_sets": 69
+    },
+    {
+      "id": "34EC",
+      "frames": 69,
+      "distinct_matrix_sets": 69
+    }
+  ],
+  "scope": "Offline private No Mercy memory; no live combat or opponent binding verified"
+}
