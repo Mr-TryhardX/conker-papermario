@@ -1,4 +1,5 @@
 #include "ui_nomercy_preview.h"
+#include "ui_nomercy_actor.h"
 #include "nomercy_audio.h"
 #include "recomp_ui.h"
 #include "hh_support.h"
@@ -33,6 +34,7 @@ struct Assets {
 } assets;
 }
 void recompui::register_nomercy_images(){
+    register_nomercy_actor_images();
     static bool tried=false;if(tried)return;tried=true;
     for(const char* id:{"45B6","2650","1893"}){
         const auto path=hybridheaven::get_asset_path((std::string("nomercy/")+id+".png").c_str());

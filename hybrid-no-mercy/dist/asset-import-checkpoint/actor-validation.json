@@ -1,0 +1,21 @@
+{
+  "scope": "Complete textured Kane native reference-motion preview; no playable actor replacement yet",
+  "parts": 21,
+  "triangles": 777,
+  "captured_reference_poses": 40,
+  "native_build": "PASS",
+  "native_render": "PASS; complete actor visibly moves in original renderer reference poses",
+  "shared_vertex_cache_tests": "PASS",
+  "animation_semantic_frames_decoded": 152778,
+  "animation_files": 5789,
+  "original_mips_comparison": {
+    "frames": 10,
+    "joints_per_frame": 19,
+    "result": "exact float outputs"
+  },
+  "campaign_actor_hook": "pending",
+  "skeletal_gameplay_playback": "pending",
+  "full_create_a_wrestler": "pending",
+  "crowd_event_mapping": "pending",
+  "new_windows_campaign_build": false
+}

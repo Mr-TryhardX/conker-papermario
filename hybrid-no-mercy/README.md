@@ -1,4 +1,4 @@
-The current goal is the full Hybrid Heaven campaign with No Mercy assets. See [asset integration checkpoint](ASSET_INTEGRATION.md) for verified imports and unfinished gameplay bindings.
+The current goal is the full Hybrid Heaven campaign with No Mercy assets. The native import preview now displays a complete textured Kane through 40 captured reference poses. A semantic animation decoder passes comparison against the original game, but playable actor replacement is still pending. See [asset integration checkpoint](ASSET_INTEGRATION.md) and [current scope](PROJECT_SCOPE.md).
 
 # Hybrid / No Mercy — Career Systems Lab
 

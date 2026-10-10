@@ -11,7 +11,7 @@ game=root/"native/HybridHeaven"
 for name in ["career.hpp","career.cpp"]:
     dest=game/"src/career"/name;dest.parent.mkdir(exist_ok=True)
     shutil.copyfile(root/"src"/name,dest)
-for name in ["ui_career.h","ui_career.cpp","ui_nomercy_preview.h","ui_nomercy_preview.cpp","nomercy_audio.h","nomercy_audio.cpp"]:
+for name in ["ui_career.h","ui_career.cpp","ui_nomercy_preview.h","ui_nomercy_preview.cpp","nomercy_audio.h","nomercy_audio.cpp","ui_nomercy_actor.h","ui_nomercy_actor.cpp"]:
     shutil.copyfile(root/"integration"/name,game/"src/ui"/name)
 shutil.copyfile(root/"integration/career.rml",game/"assets/config_menu/career.rml")
 
@@ -43,3 +43,9 @@ for name,source in [("shop.wav","assets/audio/no-mercy-shop.wav"),("Kane.wav","a
 bank=root/"asset-import/nomercy/audio/bank1"
 if bank.exists():shutil.copytree(bank,audio/"bank1",dirs_exist_ok=True)
 print("Career Lab and No Mercy import bench installed. Rebuild and verify actual rendering/audio after changes.")
+
+edit("CMakeLists.txt", "src/ui/ui_nomercy_actor.cpp", "    ${CMAKE_SOURCE_DIR}/src/ui/ui_nomercy_preview.cpp", "    ${CMAKE_SOURCE_DIR}/src/ui/ui_nomercy_preview.cpp\n    ${CMAKE_SOURCE_DIR}/src/ui/ui_nomercy_actor.cpp")
+edit("src/ui/ui_elements.cpp", '#include "ui_nomercy_actor.h"', '#include "ui_nomercy_preview.h"', '#include "ui_nomercy_preview.h"\n#include "ui_nomercy_actor.h"')
+edit("src/ui/ui_elements.cpp", 'CUSTOM_ELEMENT("nomercy-actor"', 'static RecompCustomElement custom_elements[] = {', 'static RecompCustomElement custom_elements[] = {\n    CUSTOM_ELEMENT("nomercy-actor", recompui::ElementNoMercyActor),')
+actor=root/"asset-import/kane-native"
+if actor.exists():shutil.copytree(actor,game/"assets/nomercy/actor",dirs_exist_ok=True)

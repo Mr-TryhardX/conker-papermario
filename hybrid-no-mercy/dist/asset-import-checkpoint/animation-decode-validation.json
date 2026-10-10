@@ -1,0 +1,6 @@
+{
+  "reference": "Unmodified func_800135D0 recompiled from supplied ROM",
+  "frames": 10,
+  "joints_per_frame": 19,
+  "result": "exact float match including unset translations"
+}
