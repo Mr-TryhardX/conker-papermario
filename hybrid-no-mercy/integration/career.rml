@@ -1,8 +1,8 @@
 <template name="config-menu__career" content="career-content">
 <head><style>
-.career-lab { padding: 20dp; overflow-y: auto; background-color: #101810; color: #e9eee3; }
-.career-lab h2 { color: #9adb62; margin: 8dp 0; }
-.career-lab p { margin: 8dp 0; }
+.career-lab { padding: 20dp; max-height: 68vh; overflow-y: auto; background-color: #101810; color: #e9eee3; }
+.career-lab h2 { display: block; color: #9adb62; margin: 8dp 0; }
+.career-lab p { display: block; margin: 8dp 0; }
 .career-lab button { display: inline-block; padding: 8dp; margin: 4dp; background-color: #273525; color: #e9eee3; }
 .career-lab button:focus { background-color: #466a31; }
 </style></head>
@@ -11,12 +11,12 @@
 <p>Systems prototype. These encounters do not affect Hybrid Heaven's exploration or combat. Wrestler models, attire visuals and imported animations are pending.</p>
 <h2>{{name}}</h2><p>{{status}}</p><p>{{perk}}</p><p>{{progress}}</p><p>{{message}}</p>
 <h2>Roster and attire slots</h2>
-<button data-for="fighter : roster" data-event-click="career_action('select',fighter_index)">{{fighter}}</button>
+<button data-for="fighter, fighter_index : roster" data-event-click="career_action('select',fighter_index)">{{fighter}}</button>
 <div><button data-event-click="career_action('attire',0)">Attire 1</button><button data-event-click="career_action('attire',1)">Attire 2</button><button data-event-click="career_action('attire',2)">Attire 3</button><button data-event-click="career_action('attire',3)">Attire 4</button></div>
-<h2>Training</h2><button data-for="stat : stats" data-event-click="career_action('train',stat_index)">{{stat}}</button>
-<h2>Shop</h2><button data-for="item : shop" data-event-click="career_action('buy',item_index)">{{item}}</button>
+<h2>Training</h2><button data-for="stat, stat_index : stats" data-event-click="career_action('train',stat_index)">{{stat}}</button>
+<h2>Shop</h2><button data-for="item, item_index : shop" data-event-click="career_action('buy',item_index)">{{item}}</button>
 <button data-event-click="career_action('medkit')">Medkit / 25 credits</button>
-<h2>Test encounters</h2><button data-for="encounter : encounters" data-event-click="career_action('begin',encounter_index)">{{encounter}}</button>
-<h2>Battle actions</h2><button data-for="move : moves" data-event-click="career_action('attack',move_index)">{{move}}</button>
+<h2>Test encounters</h2><button data-for="encounter, encounter_index : encounters" data-event-click="career_action('begin',encounter_index)">{{encounter}}</button>
+<h2>Battle actions</h2><button data-for="move, move_index : moves" data-event-click="career_action('attack',move_index)">{{move}}</button>
 <button data-event-click="career_action('guard')">Guard</button><button data-event-click="career_action('recover')">Recover stamina</button><button data-event-click="career_action('heal')">Use medkit</button><button data-event-click="career_action('retreat')">Retreat</button>
 </div></body></template>

@@ -9,6 +9,7 @@
 #include <shellapi.h>
 #include <mmsystem.h>
 #include "career.hpp"
+#include "wave_music.hpp"
 #include <functional>
 #include <sstream>
 #include <random>
@@ -25,6 +26,7 @@ std::string message="Welcome. Clear Training Floor to earn your first level and 
 bool writable=true,music=true;
 std::string track="Shop music";
 std::mt19937 random_engine(std::random_device{}());
+WaveMusic audio;
 int page=0,focus=0;
 HWND window;
 HFONT normal_font,title_font,small_font;
@@ -58,8 +60,13 @@ void play_music() {
         if(!themes.empty()) {std::uniform_int_distribution<size_t> choose(0,themes.size()-1);path=themes[choose(random_engine)];track=path.stem().string();}
         else {track="Entrance themes pending extraction";path.clear();}
     }
-    if(music && !path.empty() && std::filesystem::exists(path))PlaySoundW(path.c_str(),nullptr,SND_FILENAME|SND_ASYNC|SND_LOOP|SND_NODEFAULT);
-    else PlaySoundW(nullptr,nullptr,0);
+    if(music && !path.empty() && std::filesystem::exists(path)){
+        std::string error;
+        if(!audio.play(path,error)){track="Audio playback failed";message="Music error: "+error;}
+    }else{
+        audio.stop();
+        if(music){track="Music files missing";message="Extract the whole ZIP and keep assets beside CareerLab.exe.";}
+    }
 }
 void persist_or_rollback(const career::Game& before) {
     std::string error;
@@ -157,7 +164,7 @@ LRESULT CALLBACK proc(HWND h,UINT event,WPARAM w,LPARAM l) {
         if(w==VK_ESCAPE){activate(0);return 0;}
         if(!buttons.empty() && (w==VK_DOWN || w==VK_RIGHT || w==VK_TAB || w==VK_UP || w==VK_LEFT)){int step=(w==VK_UP || w==VK_LEFT)?-1:1;focus=(focus+step+static_cast<int>(buttons.size()))%static_cast<int>(buttons.size());InvalidateRect(h,nullptr,FALSE);return 0;}
         if((w==VK_RETURN || w==VK_SPACE) && focus>=0 && focus<static_cast<int>(buttons.size()) && buttons[focus].enabled){activate(buttons[focus].id);return 0;}break;
-    case WM_DESTROY:PlaySoundW(nullptr,nullptr,0);PostQuitMessage(0);return 0;
+    case WM_DESTROY:audio.stop();PostQuitMessage(0);return 0;
     }
     return DefWindowProcW(h,event,w,l);
 }

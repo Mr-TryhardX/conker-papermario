@@ -1,5 +1,7 @@
 # Hybrid / No Mercy — Career Systems Lab
 
+The newer **Animated World Prototype** adds a playable 3D facility and visible attacks and finishers. See [ANIMATED_DEMO.md](ANIMATED_DEMO.md) and run `AnimatedDemo.exe` from that download. The original menu-only lab remains available below.
+
 This first Windows prototype lets you test a wrestling RPG career loop. It is a separate menu-driven application, not a merged N64 ROM. There is no 3D world or animated wrestling in this build. It does not run in Project64.
 
 ## Play
@@ -29,6 +31,6 @@ Hybrid Heaven world integration, imported No Mercy wrestler models and real cost
 
 `bash tools/build_lab.sh` runs 115 career-engine checks and cross-compiles the Windows application. It needs Linux GCC with C++20 and `x86_64-w64-mingw32-g++-posix`; `MINGW_CXX` can override the latter. The JSON header is bundled with its MIT notice.
 
-The `integration` files and `tools/apply_native_integration.py` add an experimental Career Lab settings tab to the local Hybrid Heaven recompilation. This integration has passed a C++ syntax check but has not been validated in a rendered game build. The standalone Windows application is the tested deliverable.
+The `integration` files and `tools/apply_native_integration.py` add a separate Career Lab settings tab to the local Hybrid Heaven recompilation. The Linux native rendered build now passes; its launcher, a career battle, and original game's boot graphics were checked. This tab remains separate from original Hybrid Heaven gameplay. It is not part of the downloadable Windows prototype.
 
 Music was captured from the user-supplied No Mercy ROM. No complete ROM is included. Original music remains owned by its respective rights holders. Original career code is GPL-3.0-or-later; see `COPYING` and `THIRD_PARTY_NOTICES.md`.
