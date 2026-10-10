@@ -49,3 +49,7 @@ edit("src/ui/ui_elements.cpp", '#include "ui_nomercy_actor.h"', '#include "ui_no
 edit("src/ui/ui_elements.cpp", 'CUSTOM_ELEMENT("nomercy-actor"', 'static RecompCustomElement custom_elements[] = {', 'static RecompCustomElement custom_elements[] = {\n    CUSTOM_ELEMENT("nomercy-actor", recompui::ElementNoMercyActor),')
 actor=root/"asset-import/kane-native"
 if actor.exists():shutil.copytree(actor,game/"assets/nomercy/actor",dirs_exist_ok=True)
+
+shutil.copyfile(root/"integration/hh_player_probe.hpp",game/"src/main/hh_player_probe.hpp")
+edit("src/main/rt64_render_context.cpp", '#include "hh_player_probe.hpp"', '#include <algorithm>', '#include <algorithm>\n#include "hh_player_probe.hpp"')
+edit("src/main/rt64_render_context.cpp", 'hh_player_probe::tick(app->core.RDRAM);', '    frame_probe.frame_start(hh_overlay_load_count());', '    frame_probe.frame_start(hh_overlay_load_count());\n    hh_player_probe::tick(app->core.RDRAM);')
