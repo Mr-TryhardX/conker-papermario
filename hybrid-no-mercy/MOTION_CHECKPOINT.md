@@ -163,3 +163,15 @@ pose/render timing or matrix interpretation. The paired compositor is an
 offline diagnostic, not a validated world anchor or native combat feature.
 Do not use its relative matrix for combat positioning until this discrepancy
 is explained and verified against original displayed contact.
+
+Matrix discrepancy diagnosis: pausing the original match allows pose and
+submitted renderer matrices to settle. The inspected paused pair's relative
+root disagreement falls to 0.0028258645, with per-joint camera spreads
+0.0022438746 and 0.0019942132. This supports a pose/render timing mismatch
+in moving snapshots rather than one consistent incorrect matrix convention.
+The compositor now rejects root or per-joint matrix disagreement above 0.01;
+paused paired capture passes. Moving captures cannot yet be treated as
+validated rigid world poses. A decoded hand/neck fitting experiment over
+frames 8..54 also finds large residuals (best tested hand/head fit RMS 21.78
+units), so a constant offset is insufficient for Chokeslam from Hell. Original
+actor root motion/paired move positioning remains necessary.

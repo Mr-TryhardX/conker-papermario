@@ -18,7 +18,16 @@ def compose(first, second):
         raise ValueError('Invalid actor-to-clip matrix')
     try:relative=cameras[1]@np.linalg.inv(cameras[0])
     except np.linalg.LinAlgError as e:raise ValueError('Singular shared coordinate transform') from e
+    roots=[np.asarray(a['actor_root_matrix'],dtype=float).reshape(4,4) for a in (first,second)]
+    if any(not np.isfinite(m).all() for m in roots):raise ValueError('Nonfinite actor root')
+    try:expected=roots[1]@np.linalg.inv(roots[0])
+    except np.linalg.LinAlgError as e:raise ValueError('Singular actor root') from e
+    error=float(np.max(np.abs(relative-expected)))
+    if error>.01 or any(a.get('camera_matrix_max_disagreement',float('inf'))>.01 for a in (first,second)):
+        raise ValueError('Pose and renderer matrices disagree; capture a settled paused frame')
     result=copy.deepcopy(first);result['parts']=[]
+    result['relative_root_max_error']=error
+
     for actor, transform in ((first,np.eye(4)),(second,relative)):
         for original in actor['parts']:
             part=copy.deepcopy(original)

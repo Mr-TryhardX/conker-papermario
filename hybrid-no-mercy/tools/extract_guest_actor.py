@@ -196,6 +196,15 @@ def run(snapshot,out,actor_index=0):
     if len(parts)<20:raise ValueError('Incomplete reference actor')
     first=next(p for p in parts if abs(np.linalg.det(np.array(p['reference_matrix']).reshape(4,4)))>.1)
     camera=np.linalg.inv(np.array(first['reference_matrix']).reshape(4,4))@np.array(first['clip_matrix'])
+    # Per-joint float poses can advance before the submitted fixed matrices.
+    # Measure consistency rather than silently treating a mixed frame as rigid.
+    candidates=[]
+    for part in parts:
+        if 1<=(part['bone']-base)//0xdc<=19:
+            matrix=np.array(part['reference_matrix']).reshape(4,4)
+            if abs(np.linalg.det(matrix))>.1:
+                candidates.append(np.linalg.inv(matrix)@np.array(part['clip_matrix']))
+    spread=max((float(np.max(np.abs(c-camera))) for c in candidates),default=float('inf'))
     inverse=np.linalg.inv(camera)
     seen,task,root,size=replay_actor_task(g,parts,inverse,actor_index)
     if len(seen)!=len(parts):raise ValueError('Missing draw parts')
@@ -207,7 +216,7 @@ def run(snapshot,out,actor_index=0):
             'snapshot_sha256':hashlib.sha256(data).hexdigest(),
             'graphics_task':task,'display_list_root':root,'display_list_bytes':size,
             'actor_index':actor_index,'actor_skeleton_base':base,
-            'actor_to_clip_matrix':camera.tolist(),
+            'actor_to_clip_matrix':camera.tolist(),'camera_matrix_max_disagreement':spread,
             'actor_root_matrix':list(g.unpack('>16f',base+0x1c)),'parts':parts}
     (out/'actor.json').write_text(json.dumps(record)+'\n')
     print(f'Reconstructed {len(parts)} textured draw parts, {sum(len(p["faces"]) for p in parts)} triangles')

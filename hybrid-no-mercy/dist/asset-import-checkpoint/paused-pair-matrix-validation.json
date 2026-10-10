@@ -1,0 +1,9 @@
+{
+  "scope": "Paused original match only; moving captures unverified",
+  "actor_indices": [
+    0,
+    1
+  ],
+  "relative_root_max_error": 0.0028258644666294686,
+  "result": "Passed 0.01 consistency gate"
+}
