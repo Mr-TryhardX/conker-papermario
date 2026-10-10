@@ -6,6 +6,9 @@
 // Drive captured locomotion from actual displacement, including collision
 // stops. No controller input or original movement state is modified.
 struct KaneMotion {
+    // Initial eight-unit cycle repeated about twelve times per second at the
+    // observed corridor speed. Eighty units gives a usable starting cadence.
+    static constexpr double cycle_distance=80.0;
     uint32_t task=0, data=0;
     float x=0, z=0;
     double distance=0;
@@ -23,12 +26,12 @@ struct KaneMotion {
         x=next_x;z=next_z;last_ms=now;
         if(step>25) { distance=0;moving_until=0;return false; }
         if(step>.005) {
-            distance=std::fmod(distance+step,8.0);
+            distance=std::fmod(distance+step,cycle_distance);
             moving_until=now+125;
         }
         return now<moving_until;
     }
     size_t frame(size_t count) const {
-        return count ? static_cast<size_t>(distance*count/8.0)%count : 0;
+        return count ? static_cast<size_t>(distance*count/cycle_distance)%count : 0;
     }
 };

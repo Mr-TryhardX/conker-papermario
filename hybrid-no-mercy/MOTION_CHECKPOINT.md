@@ -71,3 +71,9 @@ silent, accelerated diagnostic: 48 screenshots captured over 28.181 seconds
 are shown over six seconds. It uses H.264 Constrained Baseline and yuv420p
 for Windows compatibility. It is evidence of the local native test, not a
 playable download or a frame-rate benchmark.
+
+Cadence follow-up: the initial eight-unit walk cycle was too fast at the
+observed corridor speed. The cycle now spans 80 movement units. A deterministic
+check verifies quarter-cycle advances and wraparound over that distance,
+and the native executable rebuild passed. Live cadence validation is pending;
+the earlier video shows the initial faster cadence.

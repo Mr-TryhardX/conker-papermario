@@ -7,7 +7,7 @@ int main() {
     assert(!m.sample(1,2,10,10,1000));
     assert(!m.sample(1,2,10.001f,10,1030));
     assert(m.sample(1,2,12,10,1060));
-    assert(m.frame(40)==9); // displacement, independent of submitted draw count
+    assert(m.frame(400)==9); // displacement, independent of submitted draw count
     auto phase=m.frame(40);
     assert(m.sample(1,2,12,10,1060) && m.frame(40)==phase);
     assert(m.sample(1,2,12,10,1150));
@@ -21,5 +21,12 @@ int main() {
     assert(m.sample(3,4,101,103,2590));
     assert(!m.sample(3,4,101,103,2000)); // clock reset
     assert(m.frame(0)==0);
+    KaneMotion stride;
+    assert(!stride.sample(1,2,0,0,0));
+    for(int i=1;i<=4;i++) {
+        assert(stride.sample(1,2,float(i*20),0,i*100));
+        assert(stride.frame(20)==size_t((i*5)%20));
+    }
+    assert(!stride.sample(1,2,80,0,525));
     std::puts("Kane motion: displacement phase, draw duplication, collision stops, teleports and invalid coordinates passed.");
 }
