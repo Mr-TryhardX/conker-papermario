@@ -1,0 +1,57 @@
+CMake Deprecation Warning at lib/rt64/src/contrib/nativefiledialog-extended/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+nfd Platform: PLATFORM_WIN32
+nfd Compiler: COMPILER_CLANGCL
+CMake Deprecation Warning at lib/rt64/src/contrib/zstd/build/cmake/CMakeLists.txt:10 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+-- ZSTD VERSION: 1.5.6
+-- CMAKE_INSTALL_PREFIX: /usr/local
+-- CMAKE_INSTALL_LIBDIR: lib
+-- ZSTD_LEGACY_SUPPORT not defined!
+-- ZSTD_MULTITHREAD_SUPPORT is enabled
+-- Plume - Building with backends: Vulkan=1 Metal= D3D12=1
+-- Plume - SDL Vulkan integration: OFF
+-- Plume - D3D12 Agility SDK: OFF
+-- Plume - Building examples: OFF
+-- /workspace/hybrid-no-mercy/native/HybridHeaven/lib/rt64/src/contrib/mupen64plus-win32-deps/SDL2-2.26.3/include SDL2;SDL2main
+CMake Deprecation Warning at lib/lunasvg/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+-- Found Freetype::Freetype - Freetype font engine enabled
+-- Found lunasvg::lunasvg - SVG plugin enabled
+CMake Deprecation Warning at lib/N64ModernRuntime/thirdparty/miniz/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+-- {fmt} version: 11.1.0
+-- Build type: RelWithDebInfo
+-- Configuring done (1.0s)
+-- Generating done (0.5s)
+-- Build files have been written to: /workspace/hybrid-no-mercy/native/HybridHeaven/build-win-ready
+Build with: cmake --build /workspace/hybrid-no-mercy/native/HybridHeaven/build-win-ready -j 6
+Windows runtime must select the Vulkan graphics backend.

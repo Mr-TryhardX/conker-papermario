@@ -1,0 +1,2 @@
+PASS: native fixed-point endian decoding, relative transforms and coherent counter grouping.
+PASS: mixed counters, missing children, duplicate tasks, cycles, bad matrices and live-tail rejection.

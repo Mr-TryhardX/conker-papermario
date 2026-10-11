@@ -320,3 +320,32 @@ The keyboard helper now supports the eight ordinary WASD directions. This
 reduces doorway zigzags with an oblique camera. A live return-door alignment
 passed through the original door into the NPC room; a console target behind
 a solid obstacle remained blocked and was interrupted with all keys released.
+
+
+## Windows build and coherent pose research
+
+Microsoft SDK downloads now work in this environment. xwin 0.10 installed
+the x64 SDK/CRT under `/workspace/toolchain/msvc`. The upstream FreeType
+Windows dependency was initialized at v2.13.2.
+`tools/prepare_windows_toolchain.sh` restores the local LLVM helpers and SDK
+layout, and `tools/configure_native_windows.sh` configures the upstream
+clang-cl toolchain with explicit workspace paths, Release compiler probes,
+LLVM manifest/librarian tools and the existing Linux file-to-C converter.
+Both helpers were exercised successfully. Compilation is underway; no
+Windows native executable or tested package is claimed by this checkpoint.
+Windows testing must select Vulkan, as the Linux-generated DXIL is unsigned.
+
+The opt-in actor observer records bounded original task topology and fixed-point
+matrices. The original raw counter can stall during gameplay, so complete
+player-tree samples now share a root-draw epoch instead. A late-created child
+fixture verifies aligned sampling; 2,000,000 original draw calls continue through
+the 32,768-record output cap. Tests also verify pointer bounds, endianness and
+unchanged guest bytes with a stub emitter. `tools/collect_native_pose.py` reads
+an immutable trace snapshot and rejects incomplete hierarchies, cycles,
+duplicate tasks, invalid transforms and a possibly unfinished final epoch.
+These are relative render-task transforms, not verified anatomical pivots.
+No complete gameplay skeleton or combat retargeting is claimed yet.
+
+The lower floor's ordinary door was reached independently of the locked coded
+gate. Following its corridor returned the test to the opening sequence; the
+cause has not been established. This is not a completed first level.

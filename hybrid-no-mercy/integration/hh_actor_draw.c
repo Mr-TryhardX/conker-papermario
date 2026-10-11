@@ -20,6 +20,15 @@ static int actor_word(const uint8_t* ram, uint32_t address, uint32_t* out) {
     memcpy(out, ram + (address - 0x80000000u), 4);
     return 1;
 }
+static int actor_in_player_tree(const uint8_t* ram, uint32_t task, uint32_t player) {
+    if (!player) return 0;
+    for (unsigned depth = 0; depth < 32; ++depth) {
+        if (task == player) return 1;
+        if (task < 0x80000000u || task > 0x807FFFC0u || (task & 3)) return 0;
+        if (!actor_word(ram, task + 0xC, &task) || !task) return 0;
+    }
+    return 0;
+}
 // Deliberately strong: generated base definitions are weak. This wrapper always
 // executes the unmodified original function with the same guest context.
 void func_8000C768_D368(uint8_t* rdram, recomp_context* ctx) {
@@ -32,6 +41,9 @@ void func_8000C768_D368(uint8_t* rdram, recomp_context* ctx) {
     static uint32_t seen_tasks[128];
     static unsigned task_counts[128];
     static uint32_t observed_player;
+    static uint64_t player_draw_epoch;
+    static uint64_t player_draws_for_binding;
+    static int capture_player_epoch;
     if (!initialized) { path = getenv("HH_ACTOR_DRAW_PROBE_PATH"); initialized = 1; }
     uint32_t task = (uint32_t)ctx->r4, player = 0, before = 0;
     int observe = count < record_limit && path && *path && task >= 0x80000000u && task <= 0x807FFFC0u;
@@ -43,7 +55,15 @@ void func_8000C768_D368(uint8_t* rdram, recomp_context* ctx) {
         memset(seen_tasks, 0, sizeof(seen_tasks));
         memset(task_counts, 0, sizeof(task_counts));
         observed_player = player;
+        player_draws_for_binding = 0;
+        capture_player_epoch = 0;
     }
+    if (observe && task == player) {
+        ++player_draw_epoch;
+        ++player_draws_for_binding;
+        capture_player_epoch = player_draws_for_binding == 1 || player_draws_for_binding % 60 == 0;
+    }
+    int player_tree = observe && actor_in_player_tree(rdram, task, player);
     actor_word(rdram, 0x8008D5BCu, &before);
     uint32_t original = 0;
     uint32_t replacement_field = hh_kane_override_begin(rdram, task, &original);
@@ -68,14 +88,38 @@ void func_8000C768_D368(uint8_t* rdram, recomp_context* ctx) {
         }
         if (observe && seen_tasks[slot] != task) { seen_tasks[slot] = task; task_counts[slot] = 0; }
     }
-    if (observe && (++task_counts[slot] == 1 || task_counts[slot] % 60 == 0)) {
+    unsigned task_count = observe ? ++task_counts[slot] : 0;
+    // Sample a whole player draw together; independent per-part strides can
+    // otherwise combine poses from different updates. Other actors stay sparse.
+    if (observe && (player_tree ? capture_player_epoch : (task_count == 1 || task_count % 60 == 0))) {
         ++count;
         uint32_t after = 0, data = 0;
         actor_word(rdram, 0x8008D5BCu, &after);
         actor_word(rdram, task + 0x2C, &data);
         FILE* file = fopen(path, "a");
         if (file) {
-            fprintf(file, "{\"draw\":%u,\"task\":%u,\"data\":%u,\"dl_before\":%u,\"dl_after\":%u,\"data_words\":[", count, task, data, before, after);
+            uint16_t update_counter = 0;
+            uint32_t matrix = 0;
+            // Original title/main-loop counter (lhu at 80001A64, increment
+            // at 80001A74). It can stall during gameplay; never use it as the
+            // pose-group key. Keep the raw wraparound value for diagnostics.
+            memcpy(&update_counter, rdram + (0x89358u ^ 2u), 2);
+            actor_word(rdram, task + 0x1C, &matrix);
+            fprintf(file, "{\"draw\":%u,\"player_draw_epoch\":%llu,\"update_counter\":%u,\"task\":%u,\"data\":%u,\"matrix\":%u,\"dl_before\":%u,\"dl_after\":%u,\"task_words\":[", count, (unsigned long long)player_draw_epoch, update_counter, task, data, matrix, before, after);
+            for (unsigned i = 0; i < 12; ++i) {
+                uint32_t value = 0;
+                actor_word(rdram, task + i * 4, &value);
+                fprintf(file, "%s%u", i ? "," : "", value);
+            }
+            fputs("],\"matrix_words\":[", file);
+            for (unsigned i = 0; i < 16; ++i) {
+                uint32_t value = 0;
+                int valid = matrix >= 0x80000000u && matrix <= 0x807FFFC0u &&
+                            actor_word(rdram, matrix + i * 4, &value);
+                if (valid) fprintf(file, "%s%u", i ? "," : "", value);
+                else fprintf(file, "%snull", i ? "," : "");
+            }
+            fputs("],\"data_words\":[", file);
             for (unsigned i = 0; i < 32; ++i) {
                 uint32_t value = 0;
                 int valid = data >= 0x80000000u && data <= 0x807FFF80u && actor_word(rdram, data + i * 4, &value);

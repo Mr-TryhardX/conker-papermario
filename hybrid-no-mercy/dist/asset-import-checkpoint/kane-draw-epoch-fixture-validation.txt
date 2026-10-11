@@ -1,0 +1,3 @@
+PASS: 2,000,000 original emitter calls continue through the 32,768-record cap.
+PASS: task topology, raw counter endian handling, and valid/invalid matrix pointer bounds.
+PASS: late-created children align with root sampling; guest bytes remain unchanged.
