@@ -256,3 +256,25 @@ player movement and camera follow continue. The helper prefers the new
 reference archive as fallback. This changes walking playback only, not original
 controls or ladder/crawl poses. Compiler reports now retain source mode and
 animation identity rather than labelling every generated archive as a capture.
+
+Live scene-transition follow-up: the optional L-button paired preview was started
+at the original first ladder. Entering ladder mode (camera 2 → 0) canceled it
+within the 3.035-second observation window, before its normal 3.45-second ending;
+mode events returned to original movement/idle. A separate held-button test
+returned from ladder mode to field mode without replaying the blocked press,
+and a fresh release/repress started preview again. Reports are
+`kane-live-ladder-preview-cancel.json` and `kane-live-ladder-held-preview.json`.
+Dialogue interruption was subsequently exercised too: triggering the original
+NPC conversation while preview was active returned to idle, and camera mode 0
+continued throughout the original key tutorial. Ladder climbing geometry
+still uses the imported idle pose, rather than a climbing animation.
+
+Actor-observer follow-up: the bounded table previously retained cutscene tasks
+and suppressed the first field NPC. Observation slots now reset when the game's
+player task changes. The native rebuild and original new-game playback passed;
+the updated logger recorded the first NPC root at task 0x80252C3C, position
+(-326, 490, -430), which the preceding logger omitted. This observer change
+does not alter actors, original control logic, or the original draw emitter.
+The new-game opening cinematic was allowed to complete normally; repeated Start
+presses did not establish a reproducible intro skip. A 640×360 research window
+improved software-renderer throughput in this cloud instance.

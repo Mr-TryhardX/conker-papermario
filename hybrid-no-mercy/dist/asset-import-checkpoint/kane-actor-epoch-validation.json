@@ -1,0 +1,10 @@
+{
+  "source_sha256": "75d622531a2fc3be256a49a1cb655f6d3db414b563ac6a1896e260bd1c611b32",
+  "previous_observer_unique_tasks": 130,
+  "previous_observer_recorded_first_npc": false,
+  "updated_observer_unique_tasks": 264,
+  "updated_observer_recorded_first_npc": true,
+  "npc_task": "0x80252c3c",
+  "npc_data": "0x8025b6d8",
+  "note": "Observation slots are reclaimed when the original player task changes; original emitter still runs unchanged."
+}

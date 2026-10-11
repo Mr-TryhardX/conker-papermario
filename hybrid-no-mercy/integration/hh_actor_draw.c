@@ -28,10 +28,19 @@ void func_8000C768_D368(uint8_t* rdram, recomp_context* ctx) {
     static unsigned count;
     static uint32_t seen_tasks[128];
     static unsigned task_counts[128];
+    static uint32_t observed_player;
     if (!initialized) { path = getenv("HH_ACTOR_DRAW_PROBE_PATH"); initialized = 1; }
     uint32_t task = (uint32_t)ctx->r4, player = 0, before = 0;
     int observe = path && *path && task >= 0x80000000u && task <= 0x807FFFC0u;
     if (observe) actor_word(rdram, 0x801BBCD0u, &player);
+    // Cutscene actor hierarchies can fill this bounded table before the field
+    // player exists. Reclaim observation slots when the game's player task
+    // changes, instead of silently excluding newly entered gameplay actors.
+    if (observe && player != observed_player) {
+        memset(seen_tasks, 0, sizeof(seen_tasks));
+        memset(task_counts, 0, sizeof(task_counts));
+        observed_player = player;
+    }
     actor_word(rdram, 0x8008D5BCu, &before);
     uint32_t original = 0;
     uint32_t replacement_field = hh_kane_override_begin(rdram, task, &original);
