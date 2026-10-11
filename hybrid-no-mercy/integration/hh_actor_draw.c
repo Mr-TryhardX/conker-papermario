@@ -26,12 +26,15 @@ void func_8000C768_D368(uint8_t* rdram, recomp_context* ctx) {
     static int initialized = 0;
     static const char* path;
     static unsigned count;
+    // Research output must remain bounded across overnight sessions. The
+    // original emitter and model override still run after this limit.
+    static const unsigned record_limit = 32768;
     static uint32_t seen_tasks[128];
     static unsigned task_counts[128];
     static uint32_t observed_player;
     if (!initialized) { path = getenv("HH_ACTOR_DRAW_PROBE_PATH"); initialized = 1; }
     uint32_t task = (uint32_t)ctx->r4, player = 0, before = 0;
-    int observe = path && *path && task >= 0x80000000u && task <= 0x807FFFC0u;
+    int observe = count < record_limit && path && *path && task >= 0x80000000u && task <= 0x807FFFC0u;
     if (observe) actor_word(rdram, 0x801BBCD0u, &player);
     // Cutscene actor hierarchies can fill this bounded table before the field
     // player exists. Reclaim observation slots when the game's player task

@@ -1,0 +1,1 @@
+PASS: 2000000 original emitter calls, exactly 32768 research records; emission continues after logging stops.

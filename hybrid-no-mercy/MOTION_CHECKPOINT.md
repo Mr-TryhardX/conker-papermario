@@ -286,3 +286,15 @@ The first live route reached original ladder mode 0 at (-299.76,490.24,-475.55),
 instead of treating proximity to the upper landing as a successful attachment.
 No guest-memory writes, teleports, or save edits are used. Descent is only sent
 after confirming the expected ladder mode and position.
+
+Long-session observer follow-up: research draw output is capped at 32,768
+records per process. The native rebuild passed. An isolated harness exercised
+2,000,000 emitter calls and verified exactly 32,768 records while every original
+emitter call still ran. The already-running game retains the previous binary;
+its older 885 MB log was rotated and compressed to 61 MB without restarting
+the session. Original story progress and saves were preserved.
+
+The lower gate now has a verified original key interaction: hold R and press A
+(keyboard r + space). It reports “This code is no longer in use. Please renew
+the code.” The supplied key needs the original code changer; the gate remains
+closed, and the first battle is not yet a completed milestone.
