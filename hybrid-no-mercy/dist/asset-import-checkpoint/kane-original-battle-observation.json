@@ -1,0 +1,100 @@
+{
+  "source": "Hybrid Heaven original DEMO PLAY attract battle",
+  "native_player_model": "WWF No Mercy Kane",
+  "battle_camera_mode": 3,
+  "battle_samples": 59,
+  "first_battle_sample": {
+    "camera_mode": 3,
+    "scene": [
+      0,
+      0,
+      0
+    ],
+    "frame": 7830,
+    "task": 2149913232,
+    "data": 2149949976,
+    "camera": 2149949056,
+    "position": [
+      20,
+      0,
+      550
+    ],
+    "eye": [
+      -3.61674261,
+      35,
+      599.763733
+    ],
+    "target": [
+      18,
+      8,
+      503.5
+    ],
+    "task_words": [
+      2149914220,
+      2149913180,
+      2149913284,
+      0,
+      2149913284,
+      0,
+      2149882920,
+      2150031160,
+      256,
+      2147485952,
+      268435462,
+      2149949976
+    ]
+  },
+  "last_battle_sample": {
+    "camera_mode": 3,
+    "scene": [
+      0,
+      0,
+      0
+    ],
+    "frame": 9960,
+    "task": 2149913232,
+    "data": 2149949976,
+    "camera": 2149949056,
+    "position": [
+      -20.9541016,
+      0.25,
+      496.130859
+    ],
+    "eye": [
+      25.5991936,
+      35.25,
+      477.179413
+    ],
+    "target": [
+      -26.1429596,
+      8.25,
+      495.827454
+    ],
+    "task_words": [
+      2149914220,
+      2149913180,
+      2149913284,
+      0,
+      2149913284,
+      0,
+      2149882920,
+      2150031160,
+      256,
+      2147485952,
+      268435462,
+      2149949976
+    ]
+  },
+  "original_hud_hp_seen": [
+    1600,
+    1580,
+    1491
+  ],
+  "original_move_caption_seen": "BODYSLAM",
+  "original_ai_combat": true,
+  "player_controlled_campaign_battle_verified": false,
+  "nomercy_combat_animation_hook_verified": false,
+  "video_has_audio": false,
+  "video_duration_seconds": 12,
+  "health_hud_replacement_done": false
+}

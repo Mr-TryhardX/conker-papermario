@@ -298,3 +298,25 @@ The lower gate now has a verified original key interaction: hold R and press A
 (keyboard r + space). It reports “This code is no longer in use. Please renew
 the code.” The supplied key needs the original code changer; the gate remains
 closed, and the first battle is not yet a completed milestone.
+
+## Original battle rendering observation
+
+The game's own title-screen DEMO PLAY sequence reached an original fight
+with the imported Kane model. Player probes confirm battle camera mode 3
+at root task 0x80251290, distinct from the first-field root. The original
+attack/escape menus, enemy body slam and HP changes (1600 → 1580 → 1491)
+remained visible. This establishes model substitution in an original battle
+without a separate battle-only rendering hook. It is an automatic attract
+sequence, not a player-controlled campaign battle. Kane currently uses the
+imported standing/walking geometry; original combat poses have not yet been
+replaced with synchronized No Mercy attacks or defender animations.
+
+`Kane-Original-Battle-Observation.mp4` captures 360 frames at 30 fps over
+12.0004 seconds (12.0 seconds encoded), 640×360, H.264 Constrained Baseline,
+yuv420p, with no audio. The accompanying JSON identifies the original DEMO
+PLAY source and separates battle rendering from unfinished gameplay hooks.
+
+The keyboard helper now supports the eight ordinary WASD directions. This
+reduces doorway zigzags with an oblique camera. A live return-door alignment
+passed through the original door into the NPC room; a console target behind
+a solid obstacle remained blocked and was interrupted with all keys released.

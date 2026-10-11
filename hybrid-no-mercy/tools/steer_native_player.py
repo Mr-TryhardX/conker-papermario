@@ -71,10 +71,18 @@ def steer(args):
                 raise ValueError('Camera has no usable horizontal direction')
             fx, fz = fx / length, fz / length
             forward, left = dx * fx + dz * fz, dx * fz - dz * fx
-            key = ('w' if forward > 0 else 's') if abs(forward) > abs(left) else ('a' if left > 0 else 'd')
-            subprocess.run(['xdotool', 'keydown', key], check=True)
+            # Use the eight normal keyboard directions. Four-direction steering
+            # zigzags across narrow doorway triggers when the camera is oblique.
+            strongest = max(abs(forward), abs(left))
+            threshold = strongest * math.tan(math.pi / 8)
+            keys = []
+            if abs(forward) >= threshold:
+                keys.append('w' if forward > 0 else 's')
+            if abs(left) >= threshold:
+                keys.append('a' if left > 0 else 'd')
+            subprocess.run(['xdotool', 'keydown', *keys], check=True)
             time.sleep(max(.12, min(args.step, distance / 65)))
-            subprocess.run(['xdotool', 'keyup', key], check=True)
+            subprocess.run(['xdotool', 'keyup', *keys], check=True)
             # Wait for two distinct appended samples after key release; the
             # renderer's probe is asynchronous and its default stride is 30.
             released_frame = latest(args.probe)['frame']
