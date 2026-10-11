@@ -187,3 +187,24 @@ gState+0x29A and scene bytes +0x254..0x256 (N64 byte swizzling verified in tests
 Bounds, finite-coordinate, byte-order and read-only tests pass; the native
 executable rebuild passes. The already-running playthrough still uses the older
 probe, so live phase-field output is pending a later restart.
+
+
+Optional direct animation-preview control: `HH_KANE_PREVIEW_BUTTON=1`, together
+with `HH_KANE_PREVIEW_MODEL_PATH`, reads the original game's unused L button
+(default keyboard E). A rising edge in exploration camera mode 2 starts one
+preview. Holding it cannot loop or defer a request across a task/mode change.
+The button path replaces file polling; keep both options unset for ordinary
+play. The rebuilt source also cancels immediately when camera mode leaves 2;
+unit checks verify cancellation and prevent resuming a consumed request.
+
+Live isolated portable test (autosave Off; earlier playthrough preserved): the
+exact-local 69-frame archive `kane-chokeslam-exact-displaylists` rendered in the
+original first corridor. Holding E for five seconds logged exactly one
+preview-to-idle transition; releasing and pressing again produced a second
+preview-to-idle transition. Original position remained (-300,490.25,262.175781).
+`Kane-L-Button-Native-Preview.mp4` records the second press: 180 frames at 30 fps
+in 6.000109 wall-clock seconds, H.264 Constrained Baseline/yuv420p, 1280x720.
+It is silent attacker-only geometry playback, without damage/opponent contact.
+The camera-mode observer now works live: opening cutscene 0, first corridor 2.
+The subsequent mode-exit cancellation refinement passed unit tests and native
+rebuild; a live scene transition during an active preview remains untested.

@@ -66,6 +66,7 @@ Model walk_model;
 Model preview_model;
 KaneMotion motion;
 KanePreview preview;
+KanePreviewButton preview_button;
 uint32_t preview_request=0;
 int64_t last_preview_poll=0;
 void poll_preview_request(int64_t ms) {
@@ -101,8 +102,20 @@ extern "C" uint32_t hh_kane_override_begin(uint8_t* ram,uint32_t task,uint32_t* 
     size_t frame=(ms/120)%model.frames.size();
     if(walking) { frame=motion.frame(walk_model.frames.size());pose=walk_model.frames[frame]; }
     preview_model.load(ram,"HH_KANE_PREVIEW_MODEL_PATH");
-    poll_preview_request(ms);
-    auto preview_frame=preview.sample(task,preview_request,ms,preview_model.frames.size());
+    static const bool button_preview=[] {
+        const char* value=std::getenv("HH_KANE_PREVIEW_BUTTON");
+        return value && std::strcmp(value,"1")==0;
+    }();
+    bool preview_allowed=true;
+    if(button_preview) {
+        uint16_t held=0;
+        std::memcpy(&held,ram+((0x1BBBF0u+0x9Eu)^2u),sizeof(held));
+        uint8_t camera_mode=ram[(0x1BBBF0u+0x29Au)^3u];
+        preview_allowed=camera_mode==2;
+        auto request=preview_button.sample(task,(held&0x20u)!=0,preview_allowed);
+        if(request)preview_request=*request;
+    } else poll_preview_request(ms);
+    auto preview_frame=preview.sample(task,preview_request,ms,preview_model.frames.size(),preview_allowed);
     unsigned mode=walking?1:0;
     if(preview_frame) { mode=2;frame=*preview_frame;pose=preview_model.frames[frame]; }
     static const char* probe=std::getenv("HH_KANE_MOTION_PROBE_PATH");

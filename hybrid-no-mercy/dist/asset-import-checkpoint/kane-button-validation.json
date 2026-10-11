@@ -1,0 +1,16 @@
+{
+  "archive": "kane-chokeslam-exact-displaylists",
+  "poses": 69,
+  "control": "original N64 L (default keyboard E)",
+  "field_camera_mode": 2,
+  "held_press_count": 1,
+  "release_and_repress_count": 1,
+  "observed_preview_entries": 2,
+  "returns_to_idle": 2,
+  "position_unchanged_during_previews": true,
+  "video": "Kane-L-Button-Native-Preview.mp4",
+  "damage": false,
+  "paired_contact": false,
+  "audio_in_video": false,
+  "scene_exit_cancel": "unit and native build passed; live transition not yet tested"
+}
