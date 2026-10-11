@@ -175,3 +175,15 @@ validated rigid world poses. A decoded hand/neck fitting experiment over
 frames 8..54 also finds large residuals (best tested hand/head fit RMS 21.78
 units), so a constant offset is insufficient for Chokeslam from Hell. Original
 actor root motion/paired move positioning remains necessary.
+
+Original campaign follow-up: the local native Kane reached and opened the first
+corridor door through ordinary movement, entered the adjacent NPC/ladder room,
+triggered the original conversation, and displayed the original Code Key pickup.
+Player/camera movement and original story scripting continue with the imported
+model. This is not a full-level/combat completion claim; ladder animation,
+original battle behavior and save/load with the replacement remain pending.
+The read-only player probe now includes the original camera-mode mirror at
+gState+0x29A and scene bytes +0x254..0x256 (N64 byte swizzling verified in tests).
+Bounds, finite-coordinate, byte-order and read-only tests pass; the native
+executable rebuild passes. The already-running playthrough still uses the older
+probe, so live phase-field output is pending a later restart.

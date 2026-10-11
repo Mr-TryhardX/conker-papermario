@@ -20,6 +20,11 @@ struct Guest {
         std::memcpy(&value, ram + (address - base), 4);
         return true; // N64ModernRuntime stores host-endian words.
     }
+    bool byte(uint32_t address, uint8_t& value) const {
+        if (!ram || address < base || address-base >= size) return false;
+        value=ram[(address-base)^3u];
+        return true;
+    }
     bool real(uint32_t address, float& value) const {
         uint32_t bits;
         if (!word(address, bits)) return false;
@@ -29,11 +34,16 @@ struct Guest {
 };
 struct Player {
     uint32_t task = 0, data = 0, camera = 0;
+    uint8_t camera_mode=0;
+    std::array<uint8_t,3> scene{};
     std::array<uint32_t, 12> task_words{}; // Unknown fields remain raw.
     std::array<float, 3> position{}, eye{}, target{};
 };
 inline bool read(const Guest& guest, Player& p) {
     Player next;
+    if (!guest.byte(0x801BBBF0u+0x29A,next.camera_mode)) return false;
+    for (unsigned i=0;i<3;++i)
+        if (!guest.byte(0x801BBBF0u+0x254+i,next.scene[i])) return false;
     if (!guest.word(0x801BBBF0u + 0xE0, next.task) ||
         !guest.span(next.task, 0x30) || !guest.word(next.task + 0x2C, next.data) ||
         !guest.span(next.data, 0x10)) return false;
@@ -60,7 +70,8 @@ inline void tick(const uint8_t* ram) {
     if (!read({ram}, p)) return;
     // Append locally; this does not capture ROMs, textures or complete RAM.
     if (FILE* file = std::fopen(path, "a")) {
-        std::fprintf(file, "{\"frame\":%llu,\"task\":%u,\"data\":%u,\"camera\":%u,\"position\":[%.9g,%.9g,%.9g],\"eye\":[%.9g,%.9g,%.9g],\"target\":[%.9g,%.9g,%.9g],\"task_words\":[",
+        std::fprintf(file,"{\"camera_mode\":%u,\"scene\":[%u,%u,%u],",p.camera_mode,p.scene[0],p.scene[1],p.scene[2]);
+        std::fprintf(file, "\"frame\":%llu,\"task\":%u,\"data\":%u,\"camera\":%u,\"position\":[%.9g,%.9g,%.9g],\"eye\":[%.9g,%.9g,%.9g],\"target\":[%.9g,%.9g,%.9g],\"task_words\":[",
             static_cast<unsigned long long>(frame), p.task, p.data, p.camera,
             p.position[0], p.position[1], p.position[2], p.eye[0], p.eye[1], p.eye[2], p.target[0], p.target[1], p.target[2]);
         for (unsigned i = 0; i < p.task_words.size(); ++i)

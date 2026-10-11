@@ -13,6 +13,12 @@ int main() {
     assert(!guest.word(base + size, word));
     assert(!guest.word(base + 1, word));
     assert(guest.word(base + size - 4, word));
+    uint8_t byte=99;
+    assert(!guest.byte(base-1,byte) && byte==99);
+    assert(!guest.byte(base+size,byte));
+    ram[0x1BBE8A^3]=3;
+    ram[0x1BBE44^3]=2;ram[0x1BBE45^3]=8;ram[0x1BBE46^3]=1;
+    assert(guest.byte(0x801BBE8A,byte) && byte==3);
     Player p;
     assert(!read(guest, p));
     put(0x801BBCD0, 0x80200000);
@@ -22,6 +28,7 @@ int main() {
     real(0x80201004, 12.5f); real(0x80201008, -7.0f); real(0x8020100C, 9.0f);
     assert(read(guest, p));
     assert(p.task == 0x80200000 && p.position[0] == 12.5f && p.position[1] == -7.0f);
+    assert(p.camera_mode==3 && (p.scene==std::array<uint8_t,3>{2,8,1}));
     auto original = ram;
     assert(read(guest, p) && ram == original);
     real(0x80201004, std::numeric_limits<float>::infinity());
