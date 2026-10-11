@@ -4,11 +4,23 @@ The target is the entire original Hybrid Heaven campaign and levels with No Merc
 
 See [PROJECT_SCOPE.md](PROJECT_SCOPE.md) for the latest requested combat audio, crowd reactions, purchasable moves and full Create-a-Wrestler scope.
 
-## This checkpoint
+## Current native milestone
+
+Kane now replaces the original player in the first corridor, with imported
+standing poses, walking driven by original displacement, and an optional
+69-pose decoded attacker animation on N64 L (keyboard E). Original collision,
+camera follow, first door and NPC Code Key dialogue have been exercised.
+[MOTION_CHECKPOINT.md](MOTION_CHECKPOINT.md) records current evidence and the
+limits of paired positioning; the button video is a silent animation preview,
+not a damaging wrestling move. Complete first-level validation, paired combat,
+full roster/costumes, campaign-linked RPG systems and native Windows packaging
+remain pending. The sections below document the earlier extraction/import bench.
+
+## Earlier asset extraction checkpoint
 
 The user-supplied No Mercy USA Rev 1 ROM passes its expected SHA1. The new archive extractor decodes 19,461 entries without decompression errors. One reverse-pointer alias (documented in VPWStudio) is recorded separately rather than given an invented span.
 
-All 3,586 AKI mesh records pass vertex/triangle bounds checks. All 5,789 animation records contain complete 98-byte frames. A semantic decoder traced to original func_800135D0 now reads all 152,778 frames: 19 remapped joint records, three 10-bit degree angles, and signed-magnitude absolute/relative translations. Ten sampled first/last frames across five files exactly match the unmodified original MIPS function recompiled locally. Hierarchy transforms, original skinning, root motion and gameplay playback remain pending. All 260 default costume records are read through the original wrestler definitions, including Kane's four actual slots and their face, hair, mask, clothing and color selections. Rendering every costume still requires the original composition/rig rules.
+All 3,586 AKI mesh records pass vertex/triangle bounds checks. All 5,789 animation records contain complete 98-byte frames. A semantic decoder traced to original func_800135D0 now reads all 152,778 frames: 19 sequential joint records (slots 1..19; the dependency table is not a stream remap), three 10-bit degree angles, and signed-magnitude absolute/relative translations. Ten sampled first/last frames across five files exactly match the unmodified original MIPS function recompiled locally. Hierarchy transforms, original skinning, root motion and gameplay playback remain pending. All 260 default costume records are read through the original wrestler definitions, including Kane's four actual slots and their face, hair, mask, clothing and color selections. Rendering every costume still requires the original composition/rig rules.
 
 45 original Kane textures are converted to PNG, including his portrait, mask variants, ring attire, upper attire and entrance frames. The native Hybrid Heaven Career Lab contains an import bench showing original textures and a rotating real Medium-body mesh part. The bench now also reconstructs a complete Kane reference from 21 textured renderer parts (777 triangles), respecting shared vertex-cache loads and their individual matrices. It plays 40 captured original menu poses. These are renderer reference poses, not skeletal-codec playback, walking, combat or a playable actor replacement. A screenshot and short native preview video document the rendered result.
 
@@ -24,7 +36,7 @@ From `/workspace/hybrid-no-mercy`:
 python3 tools/extract_nomercy.py 'roms/WWF No Mercy (USA) (Rev 1).z64' native/VPWStudio/VPWStudio/VPWStudio/FileTableDB/NoMercy.txt asset-import/nomercy
 python3 tools/extract_nomercy_audio.py 'roms/WWF No Mercy (USA) (Rev 1).z64' asset-import/nomercy/audio
 python3 tools/convert_nomercy_assets.py asset-import/nomercy 'roms/WWF No Mercy (USA) (Rev 1).z64' asset-import/converted native/VPWStudio/VPWStudio/VPWStudio/WrestlerNames/NoMercy.txt
-python3 tools/decode_nomercy_animation.py asset-import/nomercy asset-import/decoded-animation
+python3 tools/decode_nomercy_animation.py asset-import/nomercy asset-import/decoded-animation-v2
 python3 tests/animation_decode_test.py
 python3 tools/check_animation_reference.py
 python3 tests/guest_actor_test.py
@@ -39,7 +51,7 @@ The developer runtime is Linux with RT64/Vulkan and SDL; the earlier downloadabl
 ## Next required engineering
 
 1. Connect decoded joint angles/translations to the original hierarchy and skinning, including palette substitutions and paired-animation root motion. The complete captured Kane reference is now established; drive it from the semantic decoder before scaling to the roster.
-2. Identify Hybrid Heaven's character draw/animation hooks and bind the imported actor to its player task, position, facing, camera and collision. The game's camera/player position fields are documented by the upstream project; a renderer hook for complete wrestler replacement is not yet established.
+2. Extend the verified first-corridor player draw hook through ladder, battle and later scene/task changes. Original player position, facing, camera and collision are retained; standing and displacement-driven walking have passed live checks.
 3. Connect paired wrestling moves to Hybrid Heaven battle state and damage/finishers. Preserve its story triggers, enemies, exploration, saves and level transitions.
 4. Identify audio samples by actual game events and synthesize additional music sequences; map menu/battle/impact/voice events without replacing the original audio blindly.
 5. Validate the first original level, then campaign progression across every level; make a supported Windows native build and package it for play.
