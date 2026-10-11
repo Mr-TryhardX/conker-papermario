@@ -1,0 +1,13 @@
+{
+  "reference": "Original func_80012BE0 and eight dependencies",
+  "capture_sha256": "0d4294a69b456de561a864bc5b7cca58f4424a23a0f358e069f0a4a4563928fb",
+  "actor_index": 0,
+  "joints": 20,
+  "matrix_elements": 320,
+  "result": "bit-exact match",
+  "joint_pivots": 19,
+  "pivot_elements": 57,
+  "pivot_result": "bit-exact match",
+  "maximum_error": 0.0,
+  "address_space": "private No Mercy memory"
+}

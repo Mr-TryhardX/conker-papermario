@@ -55,6 +55,10 @@ def bake(capture,reference,animation,output):
         scratch=work/'private-frame.ram';scratch.write_bytes(private)
         matrices=subprocess.run([executable,scratch,str(actor_index)],stdout=subprocess.PIPE,check=True).stdout
         if len(matrices)!=1280:raise ValueError('Short matrix output')
+        pivots=subprocess.run([executable,scratch,str(actor_index),'--positions'],stdout=subprocess.PIPE,check=True).stdout
+        if len(pivots)!=19*3*4:raise ValueError('Short joint-pivot output')
+        joint_pivots=np.array(struct.unpack('<57f',pivots)).reshape(19,3)
+        if not np.isfinite(joint_pivots).all():raise ValueError('Nonfinite joint pivots')
         new={i:np.array(struct.unpack_from('<16f',matrices,i*64)).reshape(4,4) for i in range(20)}
         def transformed(i,seen=None):
             if i in new:return new[i]
@@ -66,6 +70,7 @@ def bake(capture,reference,animation,output):
             return new[i]
         frame=copy.deepcopy(actor)
         frame['source']='Decoded original skeletal frame with captured vertex bindings; offline experiment'
+        frame['joint_pivots_model_space']=joint_pivots.tolist() # slots 1..19, not deformation translations
         for p in frame['parts']:
             for vertex,bone,local in zip(p['vertices'],p['vertex_bones'],p['vertex_local_positions']):
                 i=(bone-base)//220

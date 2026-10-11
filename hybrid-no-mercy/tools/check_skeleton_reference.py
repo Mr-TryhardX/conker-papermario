@@ -45,12 +45,22 @@ def main():
             maximum = max(maximum,abs(x-y))
         if original != rebuilt:
             raise AssertionError(f'Joint {joint} differs from captured matrix (max error {maximum})')
+    pivots=subprocess.run([work/'reference-skeleton',args.capture.resolve(),str(args.actor_index),'--positions'],stdout=subprocess.PIPE,check=True).stdout
+    if len(pivots)!=19*3*4:raise ValueError('Short original pivot output')
+    for joint in range(1,20):
+        original=struct.unpack_from('>3I',ram,0xA1130+args.actor_index*2852+joint*124+12)
+        rebuilt=struct.unpack_from('<3I',pivots,(joint-1)*12)
+        if original!=rebuilt:raise AssertionError(f'Joint {joint} pivot differs from capture')
+        if not all(math.isfinite(x) for x in struct.unpack_from('<3f',pivots,(joint-1)*12)):
+            raise AssertionError('Nonfinite reference pivot')
     report = {'reference':'Original func_80012BE0 and eight dependencies',
               'capture_sha256':hashlib.sha256(ram).hexdigest(),
               'actor_index':args.actor_index,'joints':20,'matrix_elements':320,'result':'bit-exact match',
+              'joint_pivots':19,'pivot_elements':57,'pivot_result':'bit-exact match',
               'maximum_error':maximum,'address_space':'private No Mercy memory'}
     (work/'validation.json').write_text(json.dumps(report,indent=2)+'\n')
     print('PASS: all 20 original skeleton matrices match the captured renderer bit for bit.')
+    print('PASS: all 19 resolved joint pivots match captured pose slots bit for bit.')
 
 if __name__ == '__main__':
     main()

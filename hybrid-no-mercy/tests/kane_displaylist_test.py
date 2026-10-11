@@ -4,6 +4,8 @@ from pathlib import Path
 p=Path(sys.argv[1]);raw=p.read_bytes()
 magic,version,frames,size,relocs=struct.unpack_from('<4sIIII',raw)
 expected_frames=int(sys.argv[2]) if len(sys.argv)>2 else 40
+expected_triangles=int(sys.argv[3]) if len(sys.argv)>3 else 777
+expected_parts=int(sys.argv[4]) if len(sys.argv)>4 else 21
 assert magic==b'KNDL' and version==1 and 1<=frames<=120 and frames==expected_frames
 metadata=struct.unpack_from('<'+'I'*(frames+relocs),raw,20)
 body=raw[20+4*(frames+relocs):];assert len(body)==size
@@ -28,6 +30,6 @@ for root in metadata[:frames]:
   elif op==0xFD:
    assert ((w0>>21)&7)==0 and ((w0>>19)&3)==2 and w1<size # RGBA16
    images+=1
- assert ended and count==777 and images==21 and loads>21
+ assert ended and count==expected_triangles and images==expected_parts and loads>expected_parts
  triangles+=count
 print(f'Native display lists: {frames} frames, {triangles} triangles, {relocs} valid relocations; vertex caches and texture commands passed.')

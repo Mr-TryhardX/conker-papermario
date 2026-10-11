@@ -171,10 +171,10 @@ root disagreement falls to 0.0028258645, with per-joint camera spreads
 in moving snapshots rather than one consistent incorrect matrix convention.
 The compositor now rejects root or per-joint matrix disagreement above 0.01;
 paused paired capture passes. Moving captures cannot yet be treated as
-validated rigid world poses. A decoded hand/neck fitting experiment over
-frames 8..54 also finds large residuals (best tested hand/head fit RMS 21.78
-units), so a constant offset is insufficient for Chokeslam from Hell. Original
-actor root motion/paired move positioning remains necessary.
+validated rigid world poses. The earlier decoded hand/neck fitting experiment used deformation-matrix
+translations, which are not anatomical pivots; its RMS 21.78 does not establish
+a contact or root-motion result. See the resolved-pivot correction below.
+Original paired move positioning remains unverified.
 
 Original campaign follow-up: the local native Kane reached and opened the first
 corridor door through ordinary movement, entered the adjacent NPC/ladder room,
@@ -208,3 +208,35 @@ It is silent attacker-only geometry playback, without damage/opponent contact.
 The camera-mode observer now works live: opening cutscene 0, first corridor 2.
 The subsequent mode-exit cancellation refinement passed unit tests and native
 rebuild; a live scene transition during an active preview remains untested.
+
+
+Resolved-pivot correction: the original matrix builder resolves actual joint
+pivots in pose slots 1..19 at +0x0C; the deformation-matrix translation is not
+the joint origin. The private research wrapper now supports `--positions`.
+`check_skeleton_reference.py` compares 57 pivot float words as well as 320
+matrix words. Both actor slots passed bit-exact comparisons against the paused
+reference; the earlier forward-walk capture also passed. No guest memory or
+capture files were modified. New skeletal bakes retain finite
+`joint_pivots_model_space` for all 69 frames per side. A corrected right-hand /
+neck fit across frames 8..54 has RMS 6.4384 at 185 degrees; this geometric
+experiment does not establish the original root track, grip window or damage.
+
+Campaign control check: the opening ladder leads DOWN. Ordinary downward stick
+input moved Kane from floor Y 490.25 to Y 400.25 and reached the lower code-key
+door. A baseline run with the original player confirmed the ladder direction.
+Kane still renders idle during ladder motion; a climbing pose is pending.
+The original inventory KEY tab displays Code Key x1. The lower door prompts
+for a code key; passing it, saving and original battles remain unverified.
+
+
+Paired retarget preview: `compose_skeletal_pair.py` places the two decoded
+69-frame clips together using an explicitly authored 180-degree defender yaw
+and offset (-7,0,-61). This is separate from the captured-pair reconstruction
+path and does not bypass its matrix-consistency gate. The full imported second
+wrestler now visibly lifts and falls in inspected CPU frames 48, 55 and 68.
+Original root tracking, precise contact and gameplay damage are not established.
+The new compiler archive has 42 textured parts and 1,554 triangles per frame,
+5,990,928 body bytes and 14,766 valid relocations; loader/canary checks pass
+within the unchanged production 8 MiB bound. Authored transform direction, UV
+preservation, unchanged inputs and rejection of bad/mixed source data pass.
+Native live testing is pending; this remains a visual retargeting experiment.

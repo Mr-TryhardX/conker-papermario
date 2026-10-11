@@ -1,0 +1,19 @@
+{
+  "mode": "Authored skeletal-pair placement preview",
+  "source_animations": [
+    "34EB",
+    "34EC"
+  ],
+  "defender_yaw_degrees": 180,
+  "defender_offset": [
+    -7,
+    0,
+    -61
+  ],
+  "original_root_track_verified": false,
+  "contact_verified": false,
+  "gameplay_damage": false,
+  "frames": 69,
+  "parts_per_frame": 42,
+  "triangles_per_frame": 1554
+}

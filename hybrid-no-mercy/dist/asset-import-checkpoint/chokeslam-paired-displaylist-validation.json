@@ -1,0 +1,12 @@
+{
+  "frames": 69,
+  "parts_per_frame": 42,
+  "triangles_per_frame": 1554,
+  "vertices_total": 321678,
+  "body_bytes": 5990928,
+  "relocations": 14766,
+  "vertex_scale": 10.0,
+  "yaw_degrees": 180.0,
+  "source": "Authored skeletal-pair placement preview",
+  "animation": null
+}
