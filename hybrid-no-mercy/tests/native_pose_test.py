@@ -32,6 +32,12 @@ np.testing.assert_allclose(result['parts'][0]['relative_transform'], np.eye(4), 
 np.testing.assert_allclose(result['parts'][1]['relative_transform'], relative, rtol=0, atol=1e-12)
 assert not result['anatomical_joint_mapping_verified']
 assert not result['nomercy_retargeting_verified']
+assert not result['full_child_list_completeness_verified']
+# A live leaf's +10 link can point into a different branch. Its meaning is
+# not authenticated; it must not be treated as a same-parent last child.
+opaque_link = deepcopy(records)
+opaque_link[1]['task_words'][4] = 0x80010200
+assert len(pose(opaque_link)['parts']) == 2
 
 for change in ('counter', 'epoch', 'missing_child', 'duplicate', 'cycle', 'null_matrix', 'zero_root'):
     bad = deepcopy(records)

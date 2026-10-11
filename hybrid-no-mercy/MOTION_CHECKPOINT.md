@@ -349,3 +349,21 @@ No complete gameplay skeleton or combat retargeting is claimed yet.
 The lower floor's ordinary door was reached independently of the locked coded
 gate. Following its corridor returned the test to the opening sequence; the
 cause has not been established. This is not a completed first level.
+
+Live pose follow-up: the fresh original first field produced 19 coherent
+player draw-task transforms at root 0x80251AC4. Fixed-point decoding and
+relative transforms pass finite/invertible checks. Ordinary W input changed
+original field position and camera follow continued. This is an observed set,
+not authenticated full anatomical coverage. A previous interpretation of task
++0x10 as a last-child pointer was disproved by live links crossing parent
+branches; the collector now preserves its opaque semantics and explicitly
+reports full_child_list_completeness_verified=false. The known +8 child link
+and +C parent chain remain validated; raw full traces and transform snapshots
+stay local. See kane-native-pose-observation.json for bounded provenance.
+
+Windows build follow-up: the SDK provides ShlObj.h while RT64 includes
+Shlobj.h. The workspace SDK helper adds that exact compatibility link, and
+keeps an unchanged compiler wrapper's timestamp to avoid unnecessary rebuilds.
+The local packaging helper tools/package_native_windows.py checks all inputs
+and requires a new output folder, preserving existing packages and saves.
+It selects Vulkan and records experimental/unverified runtime status.

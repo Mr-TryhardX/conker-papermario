@@ -1,0 +1,13 @@
+{
+  "source": "original Hybrid Heaven first field",
+  "observed_player_draw_tasks": 19,
+  "player_task": "0x80251ac4",
+  "player_draw_epoch": 18799,
+  "raw_original_counter": 19958,
+  "source_trace_sha256": "7b936be4a8938fbce62e9d79e50922c9f2ecf16857a565383fe1b9dd4b4f9d18",
+  "relative_transforms_finite_and_invertible": true,
+  "full_child_list_completeness_verified": false,
+  "anatomical_joint_mapping_verified": false,
+  "nomercy_retargeting_verified": false,
+  "opaque_task_offset_10": "Live field links cross parent branches; not interpreted as last-child pointer."
+}

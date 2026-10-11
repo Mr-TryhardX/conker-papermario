@@ -45,7 +45,10 @@ def pose(records, minimum=2):
         raise ValueError('Not enough observed player draw tasks')
     for task in selected:
         row = nodes[task]
-        for index in (2, 4):  # original first/last child pointers
+        # +8 is the observed first-child link. +10 is NOT a last-child
+        # pointer: live field leaves can link across different parent branches.
+        # Preserve that raw word in the trace without inventing its semantics.
+        for index in (2,):
             child = row['task_words'][index]
             if child and (child not in selected or nodes[child]['task_words'][3] != task):
                 raise ValueError('Incomplete or inconsistent child hierarchy')
@@ -70,6 +73,7 @@ def pose(records, minimum=2):
                       'relative_transform': relative.tolist()})
     return {'player_draw_epoch': root['player_draw_epoch'], 'raw_original_counter': root['update_counter'], 'player_task': root['task'],
             'parts': parts, 'anatomical_joint_mapping_verified': False,
+            'full_child_list_completeness_verified': False,
             'nomercy_retargeting_verified': False}
 
 

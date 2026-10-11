@@ -12,14 +12,21 @@ ln -sfn include "$TASK_TOOLCHAIN/msvc/sdk/Include"
 ln -sfn lib "$TASK_TOOLCHAIN/msvc/sdk/Lib"
 ln -sfn x86_64 "$TASK_TOOLCHAIN/msvc/sdk/lib/um/x64"
 ln -sfn x86_64 "$TASK_TOOLCHAIN/msvc/sdk/lib/ucrt/x64"
+# RT64 uses a Windows-tolerated casing variant; Linux SDK paths are sensitive.
+ln -sfn ShlObj.h "$TASK_TOOLCHAIN/msvc/sdk/include/um/Shlobj.h"
 for TASK_BINARY in lld-link llvm-rc llvm-mt llvm-lib; do
   [[ -x "$TASK_TOOLCHAIN/sysroot/usr/lib/llvm-19/bin/$TASK_BINARY" ]] || { echo "Missing LLVM 19 tool: $TASK_BINARY" >&2; exit 1; }
   ln -sfn "../sysroot/usr/lib/llvm-19/bin/$TASK_BINARY" "$TASK_TOOLCHAIN/bin/$TASK_BINARY"
 done
-cat > "$TASK_TOOLCHAIN/bin/clang-cl" <<'WRAPPER'
+TASK_WRAPPER=$(mktemp "$TASK_TOOLCHAIN/bin/clang-cl.XXXXXX")
+trap 'rm -f "$TASK_WRAPPER"' EXIT
+cat > "$TASK_WRAPPER" <<'WRAPPER'
 #!/usr/bin/env bash
 TASK_BIN=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 exec "$TASK_BIN/clang" --driver-mode=cl "$@"
 WRAPPER
+if ! cmp -s "$TASK_WRAPPER" "$TASK_TOOLCHAIN/bin/clang-cl"; then
+  mv "$TASK_WRAPPER" "$TASK_TOOLCHAIN/bin/clang-cl"
+fi
 chmod +x "$TASK_TOOLCHAIN/bin/clang-cl"
 "$TASK_TOOLCHAIN/bin/clang-cl" --version
