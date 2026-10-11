@@ -1,0 +1,12 @@
+{
+  "frames": 20,
+  "parts_per_frame": 21,
+  "triangles_per_frame": 777,
+  "vertices_total": 46620,
+  "body_bytes": 921408,
+  "relocations": 2140,
+  "vertex_scale": 10.0,
+  "yaw_degrees": 180.0,
+  "source": "Offline decoded skeleton geometry experiment",
+  "animation": "4468"
+}

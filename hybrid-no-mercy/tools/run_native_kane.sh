@@ -9,7 +9,9 @@ TASK_MODEL_PATH="${HH_KANE_MODEL_PATH:-$TASK_DEFAULT_MODEL}"
 [[ -f "$TASK_MODEL_PATH" ]] || { echo "Missing generated Kane archive: $TASK_MODEL_PATH" >&2; exit 1; }
 [[ -x "$TASK_GAME_DIR/build-rendered/HybridHeavenRecompiled" ]] || { echo "Build the native rendered target first." >&2; exit 1; }
 export HH_KANE_IN_GAME=1 HH_KANE_MODEL_PATH="$TASK_MODEL_PATH"
-TASK_WALK_PATH="${HH_KANE_WALK_MODEL_PATH:-$TASK_ROOT/asset-import/kane-walk-displaylists/kane-displaylists.bin}"
+TASK_DEFAULT_WALK="$TASK_ROOT/asset-import/kane-walk-exact-displaylists/kane-displaylists.bin"
+[[ -f "$TASK_DEFAULT_WALK" ]] || TASK_DEFAULT_WALK="$TASK_ROOT/asset-import/kane-walk-displaylists/kane-displaylists.bin"
+TASK_WALK_PATH="${HH_KANE_WALK_MODEL_PATH:-$TASK_DEFAULT_WALK}"
 if [[ -f "$TASK_WALK_PATH" ]]; then
  export HH_KANE_WALK_MODEL_PATH="$TASK_WALK_PATH"
 elif [[ -n "${HH_KANE_WALK_MODEL_PATH:-}" ]]; then

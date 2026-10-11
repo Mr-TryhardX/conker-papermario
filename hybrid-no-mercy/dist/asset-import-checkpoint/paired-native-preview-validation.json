@@ -1,0 +1,13 @@
+{
+  "frames": 69,
+  "parts": 42,
+  "triangles_per_frame": 1554,
+  "observed_one_shot": true,
+  "return_to_idle": true,
+  "original_position_unchanged": true,
+  "placement": "Authored yaw 180 and offset (-7,0,-61)",
+  "original_root_track_verified": false,
+  "opponent_game_actor_connected": false,
+  "damage": false,
+  "audio_in_video": false
+}

@@ -239,4 +239,20 @@ The new compiler archive has 42 textured parts and 1,554 triangles per frame,
 5,990,928 body bytes and 14,766 valid relocations; loader/canary checks pass
 within the unchanged production 8 MiB bound. Authored transform direction, UV
 preservation, unchanged inputs and rejection of bad/mixed source data pass.
-Native live testing is pending; this remains a visual retargeting experiment.
+Native first-corridor playback now passes: the optional L-button preview shows
+both imported wrestlers through the lift and fall, then returns to idle. Player
+position stayed (-300,490.25,131.080002). The silent native video records 180
+frames at 30 fps in 6.000107 seconds, H.264 Baseline/yuv420p, 1280x720. Both
+models are rendered through the player preview; the defender is not connected
+to an original enemy, and no damage is applied.
+
+
+Decoded walking follow-up: original animation 4468 (Generic 01) now bakes 20
+distinct finite connected poses from the exact-local bind reference. The
+921,408-byte archive has 2,140 valid relocations. Native first-corridor movement
+selects this decoded walking cycle and returns to idle on release; original
+player movement and camera follow continue. The helper prefers the new
+`kane-walk-exact-displaylists` archive when present, retaining the earlier
+reference archive as fallback. This changes walking playback only, not original
+controls or ladder/crawl poses. Compiler reports now retain source mode and
+animation identity rather than labelling every generated archive as a capture.

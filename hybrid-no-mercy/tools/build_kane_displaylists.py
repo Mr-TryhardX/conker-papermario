@@ -14,7 +14,8 @@ def run(args):
     return result.stdout
 
 def build(source,out,frames=40,scale=10.0,gbi=None,yaw_degrees=180):
-    poses=json.loads((source/'poses.json').read_text())['poses'][:frames]
+    document=json.loads((source/'poses.json').read_text())
+    poses=document['poses'][:frames]
     if not poses:raise ValueError('No poses')
     out.mkdir(parents=True,exist_ok=True)
     candidates=[ROOT.parent/'papermario-main/include/PR/gbi.h',ROOT.parent/'conker-papermario/papermario-main/include/PR/gbi.h']
@@ -82,7 +83,7 @@ def build(source,out,frames=40,scale=10.0,gbi=None,yaw_degrees=180):
     header=struct.pack('<4sIIII',b'KNDL',1,len(poses),len(data),len(relocs))
     metadata=struct.pack('<'+'I'*(len(offsets)+len(relocs)),*(offsets+relocs))
     (out/'kane-displaylists.bin').write_bytes(header+metadata+data)
-    report={'frames':len(poses),'parts_per_frame':len(poses[0]['parts']),'triangles_per_frame':sum(len(p['faces']) for p in poses[0]['parts']),'vertices_total':total,'body_bytes':len(data),'relocations':len(relocs),'vertex_scale':scale,'yaw_degrees':yaw_degrees,'source':'Original-renderer reference poses; gameplay animation integration remains pending'}
+    report={'frames':len(poses),'parts_per_frame':len(poses[0]['parts']),'triangles_per_frame':sum(len(p['faces']) for p in poses[0]['parts']),'vertices_total':total,'body_bytes':len(data),'relocations':len(relocs),'vertex_scale':scale,'yaw_degrees':yaw_degrees,'source':document.get('mode','Original-renderer reference poses'),'animation':document.get('animation')}
     (out/'displaylist-validation.json').write_text(json.dumps(report,indent=2)+'\n')
     return report
 
