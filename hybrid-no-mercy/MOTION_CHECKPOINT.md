@@ -278,3 +278,11 @@ does not alter actors, original control logic, or the original draw emitter.
 The new-game opening cinematic was allowed to complete normally; repeated Start
 presses did not establish a reproducible intro skip. A 640×360 research window
 improved software-renderer throughput in this cloud instance.
+
+Native route testing now uses `tools/steer_native_player.py`: ordinary WASD input
+into an explicitly selected test window, with two fresh observer samples after
+each release. It stops input on stale probes, unexpected modes, or timeout.
+The first live route reached original ladder mode 0 at (-299.76,490.24,-475.55),
+instead of treating proximity to the upper landing as a successful attachment.
+No guest-memory writes, teleports, or save edits are used. Descent is only sent
+after confirming the expected ladder mode and position.
