@@ -1,0 +1,1 @@
+PASS: 115 checks; six-encounter chapter, rewards, training, shop, profiles, defeats and durable saves.

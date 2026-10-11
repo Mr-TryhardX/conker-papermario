@@ -4,6 +4,14 @@
 #include <filesystem>
 #include <limits>
 
+static void test_environment(const char* name, const char* value) {
+#ifdef _WIN32
+    assert(_putenv_s(name, value) == 0);
+#else
+    assert(setenv(name, value, 1) == 0);
+#endif
+}
+
 namespace recomp {
 size_t allocated_size=0;
 void* alloc(uint8_t* ram,size_t size) { assert(size<=0x800000); allocated_size=size; return ram+0x1000100; }
@@ -13,8 +21,8 @@ int main(int argc,char** argv) {
     assert(argc==2 || argc==3);
     size_t expected=argc==3 ? std::strtoul(argv[2],nullptr,10) : 40;
     assert(expected>0 && expected<=120);
-    setenv("HH_KANE_MODEL_PATH",argv[1],1);
-    setenv("HH_KANE_IN_GAME","1",1);
+    test_environment("HH_KANE_MODEL_PATH",argv[1]);
+    test_environment("HH_KANE_IN_GAME","1");
     std::vector<uint8_t> ram(0x1800101,0xA5);
     Model fixture;
     fixture.load(ram.data());
@@ -83,7 +91,7 @@ int main(int argc,char** argv) {
     auto invalid=std::filesystem::temp_directory_path()/"kane-invalid-test.bin";
     uint32_t metadata[]={1,1,1,1,0,0};
     { std::ofstream f(invalid,std::ios::binary);f.write("KNDL",4);f.write(reinterpret_cast<const char*>(metadata),sizeof(metadata));f.put(0); }
-    setenv("HH_KANE_MODEL_PATH",invalid.c_str(),1);
+    test_environment("HH_KANE_MODEL_PATH",invalid.string().c_str());
     Model rejected;rejected.load(ram.data());assert(rejected.frames.empty());
     std::filesystem::remove(invalid);
     std::printf("Kane model: %zu native lists, endian conversion, owned allocation, eligibility, pointer restoration and malformed archive checks passed.\n",expected);

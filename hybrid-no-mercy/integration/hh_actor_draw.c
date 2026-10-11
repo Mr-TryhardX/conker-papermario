@@ -29,8 +29,9 @@ static int actor_in_player_tree(const uint8_t* ram, uint32_t task, uint32_t play
     }
     return 0;
 }
-// Deliberately strong: generated base definitions are weak. This wrapper always
-// executes the unmodified original function with the same guest context.
+// Deliberately strong: the installer renames the generated base definition
+// because COFF weak inline linkage cannot safely interpose it. All original
+// references resolve here; the exact original body runs with the same context.
 void func_8000C768_D368(uint8_t* rdram, recomp_context* ctx) {
     static int initialized = 0;
     static const char* path;

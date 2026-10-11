@@ -1,4 +1,4 @@
-The current goal is the full Hybrid Heaven campaign with No Mercy assets. Kane now replaces the player model in the native first corridor, with movement-driven walking and an optional decoded one-shot animation preview. The original first door, NPC dialogue and Code Key pickup have been exercised. Paired combat, complete-level validation and a native Windows package remain unfinished. See [motion checkpoint](MOTION_CHECKPOINT.md) and [current scope](PROJECT_SCOPE.md).
+The current goal is the full Hybrid Heaven campaign with No Mercy assets. Kane now replaces the player model in the native first corridor, with movement-driven walking and an optional decoded one-shot animation preview. The original first door, NPC dialogue and Code Key pickup have been exercised. An experimental native Windows package now boots the original game and renders Kane moving through the first corridor under Wine. Paired combat and complete-level validation remain unfinished. See [Windows demo](NATIVE_WINDOWS_DEMO.md). See [motion checkpoint](MOTION_CHECKPOINT.md) and [current scope](PROJECT_SCOPE.md).
 
 # Hybrid / No Mercy — Career Systems Lab
 

@@ -1,0 +1,9 @@
+{
+  "zip_bytes": 87809156,
+  "zip_sha256": "dfe0fdb6fbc3c9516e6f271d56affcbf76ea92cb6a5bb4c75a6b2b8ce3d00c92",
+  "archive_crc": "passed",
+  "required_files": "passed",
+  "filename": "NativeWindowsKane-Demo.zip",
+  "private_game_assets_included": true,
+  "public_git_upload": false
+}

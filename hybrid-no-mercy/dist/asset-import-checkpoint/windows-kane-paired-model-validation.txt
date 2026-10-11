@@ -1,0 +1,3 @@
+[Kane] loaded 69 native reference poses, 5990928 bytes at 81000100
+[Kane] loaded 69 native reference poses, 5990928 bytes at 81000100
+Kane model: 69 native lists, endian conversion, owned allocation, eligibility, pointer restoration and malformed archive checks passed.

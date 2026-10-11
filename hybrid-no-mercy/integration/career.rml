@@ -8,9 +8,9 @@
 </style></head>
 <body><div id="career-content" class="career-lab">
 <h2>Hybrid / No Mercy — Career Lab</h2>
-<p>Systems prototype. These encounters do not affect Hybrid Heaven's exploration or combat. The imported Kane reference preview is below; playable wrestler replacement and combat animations are pending.</p>
+<p>Career Lab progression is a separate prototype and does not affect the original game's story or combat yet. The experimental game build lets Kane explore Hybrid Heaven; synchronized wrestling combat is unfinished.</p>
 <h2>Kane — original renderer reference motion</h2>
-<p>Complete textured actor reconstructed from original draw lists. This preview plays captured menu poses. Gameplay replacement, full animation decoding and finishers are pending.</p>
+<p>This preview shows captured menu poses. Kane also appears in original gameplay; synchronized wrestling moves and finishers are unfinished.</p>
 <nomercy-actor style="display:block;width:320dp;height:360dp;" />
 <h2>Real No Mercy assets — import bench</h2>
 <p>Original Kane portraits, mask and attire textures are decoded from your ROM. The rotating view shows real Medium body meshes. These are import checks; story gameplay and the original skeletal animation decoder are not connected yet.</p>

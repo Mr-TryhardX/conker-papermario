@@ -367,3 +367,58 @@ keeps an unchanged compiler wrapper's timestamp to avoid unnecessary rebuilds.
 The local packaging helper tools/package_native_windows.py checks all inputs
 and requires a new output folder, preserving existing packages and saves.
 It selects Vulkan and records experimental/unverified runtime status.
+
+
+## Native Windows executable
+
+The x64 native Windows executable now builds (27 MB) and boots the original
+game under Wine 10 with the retained Vulkan software driver. Original title
+menus and the native Career Lab textured Kane reference render. This is a
+Windows executable, not the older menu-only CareerLab.exe prototype. The
+experimental folder is local at dist/NativeWindowsKane-20261011; direct
+physical Windows/GPU validation and imported original-gameplay rendering
+under Wine remain pending at this checkpoint. No full campaign claim is made.
+
+Final link exposed COFF strong/weak inline interposition conflicts. The mod
+installer now renames only the generated base emitter definition, preserving
+all original calls/function-table names and the exact original body in the
+local wrapper include. A byte-level check confirms only that definition
+changed. Windows and Linux rendered targets both build after this change.
+
+The native Career Lab target also needed the Windows save replacement helper
+used by the earlier prototypes. integration/career_windows_save.cpp provides
+MoveFileExW with replacement/write-through. A Windows executable fixture
+passed replacement and failure-preserves-target checks in a disposable
+folder. The existing career suite was compiled with clang-cl and executed
+under Wine: all 115 checks passed, including durable saves, backup/reload,
+corrupt-save rejection and preservation of in-memory progress. These Career
+Lab stats remain separate from original campaign combat.
+
+The portable packaging helper includes the official Microsoft C++ x64 runtime
+installer when available, selects Vulkan, and explains the original opening
+cast, normal controls and unfinished combat/music integration. All ROMs and
+imported model archives remain local. Wine testing uses a separate prefix
+artifacts/native-windows-wine-prefix, preserving the older prototype prefix;
+copy the local x64 zlib1.dll into its system32 folder and use the writable
+project XDG_CACHE_HOME. Owned Linux sessions 244675 and 296924 were paused
+with SIGSTOP to retain their RAM/progress while freeing CPU for Windows tests.
+Never assume these process IDs survive a restored environment.
+
+Windows first-field follow-up passed: selecting original New Game -> Game
+Start and completing the opening reached the actual first corridor. The
+Windows executable loaded ten standing poses (497568 bytes) and twenty
+decoded walking poses (921408 bytes) into the mod heap. Kane rendered alone,
+ordinary W moved him and original camera follow continued. A real-time
+12-second silent H.264 Constrained Baseline/yuv420p capture records walking
+and return to standing: 360 frames at 30fps, 12.000074 seconds measured.
+
+The existing loader/canary/eligibility/endian/restore/malformed-archive fixture
+now supports the Windows CRT environment setter and compiled under clang-cl.
+The 69-pose paired archive passed under Wine; the same updated fixture also
+passed on Linux. Live E-button paired preview on Windows has not yet been
+exercised; Linux live preview was verified earlier. A clean local package is
+dist/NativeWindowsKane-Demo, with a private ZIP beside it. No original save
+files or research logs are copied into the clean package. All commercial
+assets/ROMs stay local rather than being uploaded to public Git. Physical
+Windows testing, complete-level/campaign validation, synchronized wrestling
+combat, battle music/cheers and campaign RPG/CAW coupling remain unfinished.

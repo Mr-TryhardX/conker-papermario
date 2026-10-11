@@ -90,10 +90,11 @@ confirmation of this hiding change is pending; menu reference poses still do
 not constitute movement or wrestling animations. tools/run_native_kane.sh
 provides the opt-in local launcher. No new Windows campaign package exists.
 
-Windows cross-build preparation installed xwin 0.10.0. SDK downloads currently
-receive proxy 403 for aka.ms and download.visualstudio.microsoft.com; these
-precise destinations were added to the environment draft, which requires
-review/save and publication. This draft does not change current connectivity.
+Historical Windows preparation installed xwin 0.10.0 and initially hit proxy
+403 responses. That blocker is resolved: the SDK is installed, and the native
+x64 executable now builds and boots under Wine. See MOTION_CHECKPOINT.md for
+current validation. Reusable configuration is saved as a draft and still
+requires review/save and publication to activate its filesystem snapshot.
 Linux-cross-built DXIL is unsigned: a future Windows package must select Vulkan
 as documented by the native project's BUILDING.md.
 

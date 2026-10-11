@@ -26,6 +26,20 @@ def main():
     })
     if args.rom:
         files['hybridheaven.us.z64'] = args.rom
+    runtime_installer = Path('/workspace/toolchain/vc_redist.x64.exe')
+    if runtime_installer.is_file():
+        files['vc_redist.x64.exe'] = runtime_installer
+    native = ROOT / 'native/HybridHeaven'
+    for label, source in {
+        'SDL2': args.build / '_deps/sdl2-src/COPYING.txt',
+        'FreeType': native / 'lib/freetype-windows-binaries/LICENSE.TXT',
+        'RmlUi': native / 'lib/RmlUi/LICENSE.txt',
+        'DXC': native / 'lib/rt64/src/contrib/dxc/LICENSE.TXT',
+        'RT64': native / 'lib/rt64/LICENSE',
+        'ModernRuntime': native / 'lib/N64ModernRuntime/LICENSE',
+    }.items():
+        if source.is_file():
+            files[f'licenses/{label}.txt'] = source
     missing = [str(p) for p in files.values() if not p.is_file()]
     if not (args.build / 'assets').is_dir():
         missing.append(str(args.build / 'assets'))
@@ -76,8 +90,14 @@ if errorlevel 1 (
 Extract the entire folder, then double-click Play-Kane.bat. Use Start Game
 in the launcher. If prompted, select your extracted Hybrid Heaven USA ROM.
 This runs as a Windows application. It does not open in Project64.
+At the original title screen, press Enter (Start), then select New Game
+with Space (A), then choose Game Start with Space again. Let the opening
+cinematic finish. It still shows the
+original characters; Kane appears when the playable first corridor begins.
 Use Windows 10/11 x64, a GPU/driver supporting Vulkan, and the Microsoft
 Visual C++ 2015-2022 x64 Redistributable.
+If Windows reports a missing MSVCP/VCRUNTIME DLL, run the included
+vc_redist.x64.exe, then launch again.
 
 WASD moves; Space is A; left Shift is B; R is the original R button;
 Enter is Start. E previews a fixed-placement paired wrestling animation
@@ -85,6 +105,8 @@ in field mode. That preview does not hit an enemy or apply damage.
 Original controls, story, collision, enemies and damage remain in charge.
 Kane's combat poses/finishers, No Mercy battle music, crowd cheers, native
 shop/CAW coupling and full campaign validation are unfinished.
+Original Hybrid Heaven music remains during gameplay. No Mercy music can
+be auditioned in the separate Career Lab tab; battle switching is unfinished.
 
 Automatic saves are off. Original in-game saving needs an original save
 device/slot; a complete save/load cycle has not been validated here.

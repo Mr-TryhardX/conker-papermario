@@ -1,0 +1,26 @@
+{
+  "native_windows_x64_build": "passed",
+  "wine_version": "10.0",
+  "graphics_backend": "Vulkan",
+  "wine_original_new_game_first_corridor": "passed",
+  "imported_kane_idle_and_decoded_walking": "rendered",
+  "ordinary_w_movement_and_original_camera_follow": "passed",
+  "windows_career_checks_passed": 115,
+  "windows_save_replace_and_failure_preservation": "passed",
+  "windows_paired_archive_loader_69_poses": "passed",
+  "paired_preview_live_windows_input": "not yet tested",
+  "full_campaign_playthrough": "not tested",
+  "native_wrestling_combat_bridge": "unfinished",
+  "native_nomercy_battle_music_bridge": "unfinished",
+  "career_lab_original_campaign_stats_coupled": false,
+  "physical_windows_pc_test": "not tested",
+  "video": {
+    "frames": 360,
+    "fps": 30,
+    "captured_seconds": 12.000074165989645,
+    "video_seconds": 12.0,
+    "width": 1024,
+    "height": 768,
+    "timing": "nominal capture schedule; compare captured and video durations"
+  }
+}

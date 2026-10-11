@@ -33,6 +33,8 @@ def edit(relative,marker,old,new):
 edit("src/ui/ui_config.cpp",'#include "ui_career.h"', '#include "ui_saves.h"', '#include "ui_saves.h"\n#include "ui_career.h"')
 edit("src/ui/ui_config.cpp","recompui::make_career_bindings(context);", "        recompui::make_saves_bindings(context);", "        recompui::make_saves_bindings(context);\n        recompui::make_career_bindings(context);")
 edit("CMakeLists.txt","src/ui/ui_career.cpp", "    ${CMAKE_SOURCE_DIR}/src/ui/ui_saves.cpp", "    ${CMAKE_SOURCE_DIR}/src/ui/ui_saves.cpp\n    ${CMAKE_SOURCE_DIR}/src/ui/ui_career.cpp\n    ${CMAKE_SOURCE_DIR}/src/career/career.cpp")
+copy_if_changed(root/"integration/career_windows_save.cpp",game/"src/career/career_windows_save.cpp")
+edit("CMakeLists.txt","src/career/career_windows_save.cpp", "    ${CMAKE_SOURCE_DIR}/src/career/career.cpp", "    ${CMAKE_SOURCE_DIR}/src/career/career.cpp\n    ${CMAKE_SOURCE_DIR}/src/career/career_windows_save.cpp")
 edit("CMakeLists.txt","thirdparty/json)", "target_include_directories(HybridHeavenRecompiled PRIVATE ${HH_RECOMP_INCLUDES})", "target_include_directories(HybridHeavenRecompiled PRIVATE ${HH_RECOMP_INCLUDES})\ntarget_include_directories(HybridHeavenRecompiled PRIVATE ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/thirdparty/json)")
 edit("src/main/rt64_render_context.cpp","Respect portable mode for RT64", "    appConfig.useConfigurationFile = false;", "    appConfig.useConfigurationFile = false;\n    // Respect portable mode for RT64's own log folder as well as game saves.\n    if (std::filesystem::exists(\"portable.txt\")) {\n        appConfig.detectDataPath = false;\n        appConfig.dataPath = std::filesystem::current_path() / \".rt64\";\n    }")
 edit("assets/config_menu.rml","config_menu/career.rml", '\t<link type="text/template" href="config_menu/saves.rml" />', '\t<link type="text/template" href="config_menu/saves.rml" />\n\t<link type="text/template" href="config_menu/career.rml" />')
@@ -68,10 +70,19 @@ edit("src/main/rt64_render_context.cpp", 'hh_player_probe::tick(app->core.RDRAM)
 # into the delivery repository or guessing its behavior.
 original=game/"RecompiledFuncs/funcs_47.c"
 source=original.read_text()
-start=source.index("RECOMP_FUNC void func_8000C768_D368(")
+emitter="RECOMP_FUNC void func_8000C768_D368("
+base_emitter="RECOMP_FUNC void hh_base_actor_draw_unused("
+definition=emitter if emitter in source else base_emitter
+start=source.index(definition)
 end=source.index("\nRECOMP_FUNC ",start+1)
-body=source[start:end].replace("RECOMP_FUNC void func_8000C768_D368(","static void hh_original_actor_draw(",1)
+body=source[start:end].replace(definition,"static void hh_original_actor_draw(",1)
 write_if_changed(game/"src/game/hh_actor_draw_original.inc",body)
+# COFF extern-inline COMDAT definitions cannot reliably be replaced by this
+# strong executable wrapper. Rename only the generated base definition; all
+# guest calls and function-table entries retain the original wrapper symbol.
+# Keep the regenerated original body above for transparent execution.
+if definition == emitter:
+    write_if_changed(original,source[:start]+source[start:end].replace(emitter,base_emitter,1)+source[end:])
 copy_if_changed(root/"integration/hh_actor_draw.c",game/"src/game/hh_actor_draw.c")
 edit("CMakeLists.txt", "src/game/hh_actor_draw.c", "target_include_directories(HybridHeavenRecompiled PRIVATE ${HH_RECOMP_INCLUDES})", "target_include_directories(HybridHeavenRecompiled PRIVATE ${HH_RECOMP_INCLUDES})\ntarget_sources(HybridHeavenRecompiled PRIVATE ${CMAKE_SOURCE_DIR}/src/game/hh_actor_draw.c)")
 

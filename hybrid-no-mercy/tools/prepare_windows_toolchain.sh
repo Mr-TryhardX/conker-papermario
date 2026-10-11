@@ -14,6 +14,9 @@ ln -sfn x86_64 "$TASK_TOOLCHAIN/msvc/sdk/lib/um/x64"
 ln -sfn x86_64 "$TASK_TOOLCHAIN/msvc/sdk/lib/ucrt/x64"
 # RT64 uses a Windows-tolerated casing variant; Linux SDK paths are sensitive.
 ln -sfn ShlObj.h "$TASK_TOOLCHAIN/msvc/sdk/include/um/Shlobj.h"
+ln -sfn ShellScalingApi.h "$TASK_TOOLCHAIN/msvc/sdk/include/um/ShellScalingAPI.h"
+ln -sfn winmm.lib "$TASK_TOOLCHAIN/msvc/sdk/lib/um/x86_64/Winmm.lib"
+ln -sfn shcore.lib "$TASK_TOOLCHAIN/msvc/sdk/lib/um/x86_64/Shcore.lib"
 for TASK_BINARY in lld-link llvm-rc llvm-mt llvm-lib; do
   [[ -x "$TASK_TOOLCHAIN/sysroot/usr/lib/llvm-19/bin/$TASK_BINARY" ]] || { echo "Missing LLVM 19 tool: $TASK_BINARY" >&2; exit 1; }
   ln -sfn "../sysroot/usr/lib/llvm-19/bin/$TASK_BINARY" "$TASK_TOOLCHAIN/bin/$TASK_BINARY"
