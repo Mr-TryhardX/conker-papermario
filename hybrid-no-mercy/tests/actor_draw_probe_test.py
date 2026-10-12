@@ -18,12 +18,14 @@ prefix = r'''
 #include <stdint.h>
 typedef struct { uint64_t r4; } recomp_context;
 static unsigned original_calls;
+static int32_t* section_addresses;
 static void hh_original_actor_draw(uint8_t* ram, recomp_context* ctx) {
     (void)ram; (void)ctx; ++original_calls;
 }
 '''
 suffix = r'''
 uint32_t hh_kane_override_begin(uint8_t*a,uint32_t b,uint32_t*c){return 0;}
+void hh_kane_set_animation_table(uint32_t table){}
 void hh_kane_override_end(uint8_t*a,uint32_t b,uint32_t c){}
 int hh_kane_wrap_draw(uint8_t*a,uint32_t b,uint32_t c,uint32_t d,uint32_t e){return 0;}
 int hh_kane_hide_descendant(uint8_t*a,uint32_t b){return 0;}

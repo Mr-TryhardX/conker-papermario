@@ -99,6 +99,20 @@ copy_if_changed(root/"integration/hh_kane_model.cpp",game/"src/game/hh_kane_mode
 copy_if_changed(root/"integration/hh_kane_motion.hpp",game/"src/game/hh_kane_motion.hpp")
 copy_if_changed(root/"integration/hh_kane_preview.hpp",game/"src/game/hh_kane_preview.hpp")
 copy_if_changed(root/"integration/hh_battle_state.hpp",game/"src/game/hh_battle_state.hpp")
+copy_if_changed(root/"integration/hh_kane_combat.hpp",game/"src/game/hh_kane_combat.hpp")
+animation_file=game/"RecompiledFuncs/funcs_57.c"
+animation_source=animation_file.read_text()
+animation_emitter="RECOMP_FUNC void func_8000F458_10058("
+animation_base="RECOMP_FUNC void hh_base_actor_animation_unused("
+animation_definition=animation_emitter if animation_emitter in animation_source else animation_base
+animation_start=animation_source.index(animation_definition)
+animation_end=animation_source.index("\nRECOMP_FUNC ",animation_start+1)
+animation_body=animation_source[animation_start:animation_end].replace(animation_definition,"static void hh_original_actor_animation(",1)
+write_if_changed(game/"src/game/hh_actor_animation_original.inc",animation_body)
+if animation_definition==animation_emitter:
+    write_if_changed(animation_file,animation_source[:animation_start]+animation_source[animation_start:animation_end].replace(animation_emitter,animation_base,1)+animation_source[animation_end:])
+copy_if_changed(root/"integration/hh_actor_animation.c",game/"src/game/hh_actor_animation.c")
+edit("CMakeLists.txt","target_sources(HybridHeavenRecompiled PRIVATE ${CMAKE_SOURCE_DIR}/src/game/hh_actor_animation.c)","target_sources(HybridHeavenRecompiled PRIVATE ${CMAKE_SOURCE_DIR}/src/game/hh_actor_draw.c ${CMAKE_SOURCE_DIR}/src/game/hh_kane_model.cpp)","target_sources(HybridHeavenRecompiled PRIVATE ${CMAKE_SOURCE_DIR}/src/game/hh_actor_draw.c ${CMAKE_SOURCE_DIR}/src/game/hh_kane_model.cpp)\ntarget_sources(HybridHeavenRecompiled PRIVATE ${CMAKE_SOURCE_DIR}/src/game/hh_actor_animation.c)")
 edit("CMakeLists.txt", "src/game/hh_kane_model.cpp", "target_sources(HybridHeavenRecompiled PRIVATE ${CMAKE_SOURCE_DIR}/src/game/hh_actor_draw.c)", "target_sources(HybridHeavenRecompiled PRIVATE ${CMAKE_SOURCE_DIR}/src/game/hh_actor_draw.c ${CMAKE_SOURCE_DIR}/src/game/hh_kane_model.cpp)")
 
 # Remove only our earlier experimental whole-frame mode: original commands

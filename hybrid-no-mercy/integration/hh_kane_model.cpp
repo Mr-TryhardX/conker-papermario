@@ -4,6 +4,8 @@
 #include "hh_kane_motion.hpp"
 #include "hh_kane_preview.hpp"
 #include "hh_battle_state.hpp"
+#include "hh_kane_combat.hpp"
+#include <cerrno>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -65,6 +67,45 @@ struct Model {
 Model model;
 Model walk_model;
 Model preview_model;
+uint32_t animation_table=0;
+hh_battle_state::State actor_animation;
+bool actor_animation_valid=false;
+struct CombatModel {
+    Model model;
+    uint32_t resource=0;
+    bool configured=false;
+    const char* key_variable;
+    const char* path_variable;
+    void configure(){
+        if(configured)return;configured=true;
+        const char* value=std::getenv(key_variable);
+        if(!value || *value<'0' || *value>'9')return;
+        errno=0;char* end=nullptr;unsigned long parsed=std::strtoul(value,&end,0);
+        if(errno || !end || *end || parsed>UINT32_MAX)return;
+        resource=uint32_t(parsed);
+    }
+};
+CombatModel combat_models[]={
+    {{},0,false,"HH_KANE_PUNCH_RESOURCE","HH_KANE_PUNCH_MODEL_PATH"},
+    {{},0,false,"HH_KANE_KICK_RESOURCE","HH_KANE_KICK_MODEL_PATH"},
+    {{},0,false,"HH_KANE_REACTION_RESOURCE","HH_KANE_REACTION_MODEL_PATH"}
+};
+struct CombatPose {uint32_t pose,resource;size_t frame;};
+std::optional<CombatPose> combat_pose(uint8_t* ram,uint32_t task){
+    hh_battle_state::State state;
+    if(!hh_battle_state::read(ram,task,state) || !state.player)return {};
+    if(actor_animation_valid && actor_animation.task==task && actor_animation.data==state.data)state=actor_animation;
+    for(auto& entry:combat_models){
+        entry.configure();
+        if(!entry.resource || state.resource!=entry.resource)continue;
+        hh_battle_state::Metadata metadata;
+        if(!hh_battle_state::metadata(ram,animation_table,state,metadata))return {};
+        entry.model.load(ram,entry.path_variable);
+        auto frame=kane_combat_frame(3,state.resource,entry.resource,state.frame(),metadata.frame_count,entry.model.frames.size());
+        if(frame)return CombatPose{entry.model.frames[*frame],state.resource,*frame};
+    }
+    return {};
+}
 KaneMotion motion;
 KanePreview preview;
 KanePreviewButton preview_button;
@@ -83,8 +124,24 @@ void poll_preview_request(int64_t ms) {
     if((file>>request) && !(file>>extra))preview_request=request;
 }
 }
+extern "C" void hh_kane_set_animation_table(uint32_t table){animation_table=table;}
+extern "C" void hh_kane_animation_update(uint8_t* ram,uint32_t actor,uint32_t animation){
+    hh_battle_state::State state;
+    if(!hh_battle_state::actor_animation(ram,actor,animation,state))return;
+    actor_animation=state;actor_animation_valid=true;
+    static const char* path=std::getenv("HH_ANIMATION_UPDATE_PROBE_PATH");
+    static hh_battle_state::Changes changes;
+    if(path && *path && changes.accept(state)){
+        auto ms=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+        if(FILE* f=std::fopen(path,"a")){
+            std::fprintf(f,"{\"host_ms\":%lld,\"task\":%u,\"actor\":%u,\"animation\":%u,\"bank\":%u,\"clip\":%u,\"frame\":%u,\"flags_raw\":%u,\"speed_bits_raw\":%u}\n",static_cast<long long>(ms),state.task,actor,animation,state.bank(),state.clip(),state.frame(),state.frame_flags,state.speed_bits);
+            std::fclose(f);
+        }
+    }
+}
 extern "C" uint32_t hh_kane_override_begin(uint8_t* ram,uint32_t task,uint32_t* original) {
     hh_battle_state::observe(ram,task);
+    hh_battle_state::snapshot(ram,task);
     static const bool enabled=std::getenv("HH_KANE_IN_GAME")!=nullptr;
     if(!enabled || !in_guest(task,0x30) || read(ram,0x801BBCD0u)!=task)return 0;
     uint32_t data=read(ram,task+0x2C);
@@ -120,6 +177,8 @@ extern "C" uint32_t hh_kane_override_begin(uint8_t* ram,uint32_t task,uint32_t* 
     auto preview_frame=preview.sample(task,preview_request,ms,preview_model.frames.size(),preview_allowed);
     unsigned mode=walking?1:0;
     if(preview_frame) { mode=2;frame=*preview_frame;pose=preview_model.frames[frame]; }
+    auto combat=combat_pose(ram,task);
+    if(combat){mode=3;frame=combat->frame;pose=combat->pose;}
     static const char* probe=std::getenv("HH_KANE_MOTION_PROBE_PATH");
     static bool observed=false;
     static unsigned last_mode=0;
@@ -127,7 +186,7 @@ extern "C" uint32_t hh_kane_override_begin(uint8_t* ram,uint32_t task,uint32_t* 
     static unsigned records=0;
     if(probe && std::isfinite(x) && std::isfinite(z) && records<128 && (!observed || last_task!=task || mode!=last_mode)) {
         if(FILE* file=std::fopen(probe,"a")) {
-            std::fprintf(file,"{\"task\":%u,\"mode\":\"%s\",\"frame\":%zu,\"x\":%.9g,\"z\":%.9g}\n",task,mode==2?"preview":mode==1?"walk":"idle",frame,x,z);
+            std::fprintf(file,"{\"task\":%u,\"mode\":\"%s\",\"frame\":%zu,\"resource\":%u,\"x\":%.9g,\"z\":%.9g}\n",task,mode==3?"combat":mode==2?"preview":mode==1?"walk":"idle",frame,combat?combat->resource:0,x,z);
             std::fclose(file);++records;
         }
         observed=true;last_task=task;last_mode=mode;

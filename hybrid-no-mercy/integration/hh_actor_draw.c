@@ -9,6 +9,7 @@
 #include "hh_actor_draw_original.inc"
 
 extern uint32_t hh_kane_override_begin(uint8_t*, uint32_t, uint32_t*);
+extern void hh_kane_set_animation_table(uint32_t);
 extern void hh_kane_override_end(uint8_t*, uint32_t, uint32_t);
 extern int hh_kane_wrap_draw(uint8_t*, uint32_t, uint32_t, uint32_t, uint32_t);
 
@@ -35,6 +36,7 @@ static int actor_in_player_tree(const uint8_t* ram, uint32_t task, uint32_t play
 void func_8000C768_D368(uint8_t* rdram, recomp_context* ctx) {
     static int initialized = 0;
     static const char* path;
+    static int dense_battle;
     static unsigned count;
     // Research output must remain bounded across overnight sessions. The
     // original emitter and model override still run after this limit.
@@ -45,7 +47,7 @@ void func_8000C768_D368(uint8_t* rdram, recomp_context* ctx) {
     static uint64_t player_draw_epoch;
     static uint64_t player_draws_for_binding;
     static int capture_player_epoch;
-    if (!initialized) { path = getenv("HH_ACTOR_DRAW_PROBE_PATH"); initialized = 1; }
+    if (!initialized) { path = getenv("HH_ACTOR_DRAW_PROBE_PATH"); const char* dense=getenv("HH_BATTLE_POSE_TRACE"); dense_battle=dense && strcmp(dense,"1")==0; initialized = 1; }
     uint32_t task = (uint32_t)ctx->r4, player = 0, before = 0;
     int observe = count < record_limit && path && *path && task >= 0x80000000u && task <= 0x807FFFC0u;
     if (observe) actor_word(rdram, 0x801BBCD0u, &player);
@@ -62,11 +64,13 @@ void func_8000C768_D368(uint8_t* rdram, recomp_context* ctx) {
     if (observe && task == player) {
         ++player_draw_epoch;
         ++player_draws_for_binding;
-        capture_player_epoch = player_draws_for_binding == 1 || player_draws_for_binding % 60 == 0;
+        capture_player_epoch = player_draws_for_binding == 1 || player_draws_for_binding % 60 == 0 || (dense_battle && rdram[(0x1BBBF0u+0x29Au)^3u]==3);
     }
     int player_tree = observe && actor_in_player_tree(rdram, task, player);
     actor_word(rdram, 0x8008D5BCu, &before);
     uint32_t original = 0;
+    // Use the same relocated bank-table base as original 8000E5D4.
+    hh_kane_set_animation_table(section_addresses ? (uint32_t)section_addresses[11]+0x6A4BCu : 0);
     uint32_t replacement_field = hh_kane_override_begin(rdram, task, &original);
     uint32_t model_root = 0;
     if (replacement_field) actor_word(rdram, replacement_field, &model_root);

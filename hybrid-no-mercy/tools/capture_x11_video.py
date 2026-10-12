@@ -63,6 +63,7 @@ def main():
         proc.stdin.close()
         if proc.wait()!=0:raise RuntimeError('Video encoder failed')
         report={'frames':a.frames,'fps':a.fps,'captured_seconds':elapsed,'video_seconds':a.frames/a.fps,
+                'start_host_ms':round(start*1000),'end_host_ms':round((start+elapsed)*1000),
                 'width':w.value,'height':h.value,'timing':'nominal capture schedule; compare captured and video durations'}
         a.output.with_suffix('.capture.json').write_text(json.dumps(report,indent=2)+'\n')
         print(json.dumps(report,indent=2))
