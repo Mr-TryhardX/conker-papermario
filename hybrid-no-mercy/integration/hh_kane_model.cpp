@@ -3,6 +3,7 @@
 #include "librecomp/addresses.hpp"
 #include "hh_kane_motion.hpp"
 #include "hh_kane_preview.hpp"
+#include "hh_battle_state.hpp"
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -83,6 +84,7 @@ void poll_preview_request(int64_t ms) {
 }
 }
 extern "C" uint32_t hh_kane_override_begin(uint8_t* ram,uint32_t task,uint32_t* original) {
+    hh_battle_state::observe(ram,task);
     static const bool enabled=std::getenv("HH_KANE_IN_GAME")!=nullptr;
     if(!enabled || !in_guest(task,0x30) || read(ram,0x801BBCD0u)!=task)return 0;
     uint32_t data=read(ram,task+0x2C);

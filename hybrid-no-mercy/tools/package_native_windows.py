@@ -14,6 +14,7 @@ def main():
     parser.add_argument('output', type=Path)
     parser.add_argument('--build', type=Path, default=ROOT / 'native/HybridHeaven/build-win-ready')
     parser.add_argument('--rom', type=Path, help='Optional supplied USA ROM, for this local package only')
+    parser.add_argument('--battle-music', action='store_true', help='Enable experimental host-side battle soundtrack')
     args = parser.parse_args()
     if args.output.exists():
         parser.error('Choose a new output folder; existing packages and saves are preserved.')
@@ -85,6 +86,9 @@ if errorlevel 1 (
 )
 '''
     (args.output / 'Play-Kane.bat').write_bytes(batch.replace('\n', '\r\n').encode('ascii'))
+    if args.battle_music:
+        batch=batch.replace('set "HH_KANE_IN_GAME=1"','set "HH_KANE_IN_GAME=1"\nset "HH_NOMERCY_BATTLE_MUSIC=1"')
+        (args.output / 'Play-Kane.bat').write_bytes(batch.replace('\n', '\r\n').encode('ascii'))
     (args.output / 'README.txt').write_text('''EXPERIMENTAL NATIVE KANE BUILD
 
 Extract the entire folder, then double-click Play-Kane.bat. Use Start Game
@@ -113,9 +117,15 @@ device/slot; a complete save/load cycle has not been validated here.
 Keep the whole folder and native-launch.log when reporting a problem.
 This package contains local imported game assets: keep it out of public Git.
 ''')
+    if args.battle_music:
+        readme=args.output/'README.txt'
+        text=readme.read_text().replace("Kane's combat poses/finishers, No Mercy battle music, crowd cheers, native", "Kane's combat poses/finishers, crowd cheers, native")
+        text=text.replace('Original Hybrid Heaven music remains during gameplay. No Mercy music can\nbe auditioned in the separate Career Lab tab; battle switching is unfinished.', 'Experimental battle music switches randomly between the captured Kane and\nRock themes on the observed battle camera mode. Exploration retains the\noriginal soundtrack. This prototype lowers the original combined music/SFX\nbus to 15% during battle; sound effects are quieter too. Missing WAV files\nleave original audio unchanged. To disable, remove the\nHH_NOMERCY_BATTLE_MUSIC=1 line from Play-Kane.bat.\nCampaign battle transitions still require testing on your PC.')
+        readme.write_text(text)
     (args.output / 'package-manifest.json').write_text(json.dumps({
         'experimental': True, 'windows_runtime_verified': False,
         'full_campaign_verified': False, 'files_sha256': hashes,
+        'experimental_battle_music': args.battle_music,
     }, indent=2) + '\n')
     print(f'Created local experimental package: {args.output}')
 

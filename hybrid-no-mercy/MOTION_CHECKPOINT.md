@@ -422,3 +422,34 @@ files or research logs are copied into the clean package. All commercial
 assets/ROMs stay local rather than being uploaded to public Git. Physical
 Windows testing, complete-level/campaign validation, synchronized wrestling
 combat, battle music/cheers and campaign RPG/CAW coupling remain unfinished.
+
+
+## Battle soundtrack and animation timing research
+
+The user reports passing the blue laser wall and reaching a playable first
+campaign fight in the delivered Windows prototype. This is user feedback,
+not a locally verified campaign completion or animation milestone. The user
+now requests combat video and no further demo until combat animation works.
+
+The opt-in HH_NOMERCY_BATTLE_MUSIC=1 bridge starts a randomly selected captured
+Kane/Rock theme on observed battle camera mode 3 and stops it on leaving. It
+honors the main volume slider and ducks the original combined BGM/SFX bus to
+15%, so original sound effects are quieter too. This is not separated original
+BGM replacement. Missing/invalid WAV data leaves original audio unchanged.
+The audio heartbeat times out after 300 ms without render updates. The Linux
+and Windows builds passed. Real SDL dummy-device fixtures passed on Linux and
+Windows under Wine, exercising transition/timeout/missing-file/disabled cases.
+The native Windows attract sequence repeatedly logged theme loading and
+battle enter/leave; physical Windows audio and campaign transitions are untested.
+
+Original animation resource lookup functions 8000E58C/8000E5D4 split the
+resource word into high bank index and low clip index. 8000E748 reads frame
+and speed at animation state+4/+8. The bounded read-only hh_battle_state.hpp
+observer records root draw-task resource/frame fields during camera mode 3,
+with unclassified flags/blend/speed bits retained raw. It rejects invalid
+pointers and child tasks, suppresses duplicates and caps output at 8192
+records. Its fixture passed bounds, endian decoding, root filtering, one
+million observations, record cap and unchanged guest-memory checks. Move
+names, original action roles and No Mercy combat synchronization remain
+unverified. No new combat animation video or updated downloadable demo is
+claimed by this checkpoint. The earlier downloadable prototype is preserved.

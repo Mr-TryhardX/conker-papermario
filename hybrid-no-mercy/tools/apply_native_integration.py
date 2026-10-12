@@ -64,6 +64,15 @@ if actor.exists():shutil.copytree(actor,game/"assets/nomercy/actor",dirs_exist_o
 copy_if_changed(root/"integration/hh_player_probe.hpp",game/"src/main/hh_player_probe.hpp")
 edit("src/main/rt64_render_context.cpp", '#include "hh_player_probe.hpp"', '#include <algorithm>', '#include <algorithm>\n#include "hh_player_probe.hpp"')
 edit("src/main/rt64_render_context.cpp", 'hh_player_probe::tick(app->core.RDRAM);', '    frame_probe.frame_start(hh_overlay_load_count());', '    frame_probe.frame_start(hh_overlay_load_count());\n    hh_player_probe::tick(app->core.RDRAM);')
+for relative in ["src/main/rt64_render_context.cpp","src/main/main.cpp"]:
+    anchor='#include <algorithm>' if relative.endswith('rt64_render_context.cpp') else '#include <atomic>'
+    edit(relative,'#include "../ui/nomercy_audio.h"',anchor,anchor+'\n#if defined(HH_UI)\n#include "../ui/nomercy_audio.h"\n#endif')
+edit("src/main/rt64_render_context.cpp",'recompui::nomercy_battle_audio_tick(','    hh_player_probe::tick(app->core.RDRAM);','    hh_player_probe::tick(app->core.RDRAM);\n#if defined(HH_UI)\n    recompui::nomercy_battle_audio_tick(app->core.RDRAM);\n#endif')
+edit("src/main/rt64_render_context.cpp",'// Battle soundtrack honors the main volume slider.','#include "../ui/nomercy_audio.h"','#include "../ui/nomercy_audio.h"\n// Battle soundtrack honors the main volume slider.\n#include "hh_support.h"')
+edit("src/main/rt64_render_context.cpp",'#include "hh_sound.h"','#include "../ui/nomercy_audio.h"','#include "../ui/nomercy_audio.h"\n#include "hh_sound.h"')
+edit("src/main/rt64_render_context.cpp",'nomercy_battle_audio_tick(app->core.RDRAM, hybridheaven::get_main_volume())','nomercy_battle_audio_tick(app->core.RDRAM);','nomercy_battle_audio_tick(app->core.RDRAM, hybridheaven::get_main_volume());')
+edit("src/main/main.cpp",'get_main_volume() * recompui::nomercy_original_audio_percent()', '    const int volume = hybridheaven::get_main_volume();', '    // Prototype ducks the original mixed BGM/SFX bus during No Mercy music.\n    const int volume = hybridheaven::get_main_volume() * recompui::nomercy_original_audio_percent() / 100;')
+edit("src/main/main.cpp",'get_main_volume() / 100.0f * recompui::nomercy_original_audio_percent()', '        const float cur_main_volume = hybridheaven::get_main_volume() / 100.0f;', '        const float cur_main_volume = hybridheaven::get_main_volume() / 100.0f * recompui::nomercy_original_audio_percent() / 100.0f;')
 
 # Preserve the original emitter, generated from the user's local game, under a
 # second name. The opt-in wrapper can observe it without copying original code
@@ -89,6 +98,7 @@ edit("CMakeLists.txt", "src/game/hh_actor_draw.c", "target_include_directories(H
 copy_if_changed(root/"integration/hh_kane_model.cpp",game/"src/game/hh_kane_model.cpp")
 copy_if_changed(root/"integration/hh_kane_motion.hpp",game/"src/game/hh_kane_motion.hpp")
 copy_if_changed(root/"integration/hh_kane_preview.hpp",game/"src/game/hh_kane_preview.hpp")
+copy_if_changed(root/"integration/hh_battle_state.hpp",game/"src/game/hh_battle_state.hpp")
 edit("CMakeLists.txt", "src/game/hh_kane_model.cpp", "target_sources(HybridHeavenRecompiled PRIVATE ${CMAKE_SOURCE_DIR}/src/game/hh_actor_draw.c)", "target_sources(HybridHeavenRecompiled PRIVATE ${CMAKE_SOURCE_DIR}/src/game/hh_actor_draw.c ${CMAKE_SOURCE_DIR}/src/game/hh_kane_model.cpp)")
 
 # Remove only our earlier experimental whole-frame mode: original commands
